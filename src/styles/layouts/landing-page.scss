@@ -1,0 +1,974 @@
+/**
+ * Landing Page Styles
+ * Modern, visually impressive landing page for the countdown configuration.
+ */
+@use '../base/_breakpoints' as bp;
+
+/* CSS Variables for consistency */
+:root {
+  /* Border Radius */
+  --landing-radius-card: 12px;
+  --landing-radius-input: 8px;
+  
+  /* Border Widths */
+  --landing-border-interactive: 2px;
+  --landing-border-input: 1px;
+  
+  /* Padding */
+  --landing-padding-card: 16px;
+  --landing-padding-input: 12px 16px;
+  
+  /* Control Heights */
+  --control-height: 42px;
+  
+  /* Transitions */
+  --landing-transition-base: 0.2s ease;
+  
+  /* Colors - mapped to global CSS variables */
+  --landing-bg-card: var(--color-surface-elevated);
+  --landing-bg-input: var(--color-input);
+  --landing-border-default: var(--color-border);
+  --landing-border-hover: var(--color-text-muted);
+  /* Focus State Design Decision (Story S7):
+   * Focus borders use --color-focus-ring for consistent UX across all themes.
+   * - Primary accent (--color-accent-primary) is for selections/active states
+   * - Focus indicator uses consistent focus ring color for familiarity
+   * - This color meets 3:1 contrast against dark backgrounds
+   * - Consistent focus color improves navigation predictability
+   */
+  --landing-border-focus: var(--color-focus-ring);
+  --landing-border-selected: var(--color-accent-primary, #39d353);
+  --landing-text-primary: var(--color-text);
+  --landing-text-secondary: var(--color-text);
+  --landing-text-muted: var(--color-text-muted);
+}
+
+/* Root wrapper - must override [data-theme] positioning from app-shell.css */
+[data-testid="landing-page"][data-theme] {
+  /* Override [data-theme] styles that are meant for countdown views */
+  position: relative !important; /* Override fixed positioning */
+  inset: auto !important; /* Override inset: 0 */
+  display: block !important; /* Override flex centering */
+  align-items: unset !important;
+  justify-content: unset !important;
+  
+  min-height: 100vh;
+  /* iOS Safari fix: Use -webkit-fill-available as fallback for accurate viewport height */
+  min-height: -webkit-fill-available;
+  background: var(--color-background);
+  /* Fix Bug #1: Enable scrolling on mobile when content exceeds viewport */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* iOS Safari fix: Enable momentum-based scrolling for smooth touch scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Theme-aware background layer (actual theme background) */
+.landing-theme-background {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  /* iOS Safari fix: Use -webkit-fill-available for accurate viewport sizing */
+  height: -webkit-fill-available;
+  z-index: 0;
+  pointer-events: none;
+  transition: background-color 0.6s ease-out;
+  /* PERF: Enable compositor optimization for background */
+  contain: strict;
+}
+
+/* Theme-specific backgrounds are now co-located with themes:
+ * - contribution-graph: src/themes/contribution-graph/styles.css
+ * - fireworks: src/themes/fireworks/styles.css
+ * Backgrounds use [data-theme="<id>"] scoping to prevent CSS bleed.
+ */
+
+/* Main content wrapper */
+.landing-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 48px 24px;
+  color: var(--color-text);
+}
+
+/* Header section - inside card, sibling to main (proper landmark structure) */
+.landing-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+/* Color mode toggle positioned top-right of header with better spacing */
+.landing-header > .color-mode-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* Mobile header layout: stack toggle above content to prevent overlap
+ * Using 768px (tablet) breakpoint to prevent overlap between title and color mode toggle
+ * at tablet sizes where absolute positioning causes them to collide.
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.tablet {
+  .landing-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .landing-header > .color-mode-toggle {
+    position: static;
+    align-self: flex-end;
+  }
+}
+
+.landing-header-content {
+  /* Content is centered, toggle floats independently */
+}
+
+.landing-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.landing-subtitle {
+  font-size: 1.25rem;
+  color: var(--color-accent-secondary, #58a6ff);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.landing-description {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin: 16px auto 0;
+  max-width: 720px;
+  line-height: 1.7;
+  padding: 0 16px;
+}
+
+/* Main landmark for form content */
+.landing-main {
+  width: 100%;
+}
+
+/* Form content container inside main */
+.landing-form-content {
+  /* No additional styling needed - inherits from card */
+}
+
+/* Content card - clean overlay style */
+.landing-card {
+  /* Fix Bug #2: Increased opacity for better text contrast */
+  background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  /* Responsive max-width: adapts to screen size while capping at reasonable maximum */
+  max-width: min(calc(100% - 48px), 720px);
+  margin-top: 24px;
+  box-shadow: 0 16px 48px -12px rgb(0 0 0 / 50%);
+  /* Ensure card content (like dropdowns) appears above footer */
+  position: relative;
+  z-index: 3;
+}
+
+/* Desktop: wider card with comfortable margins
+ * Uses min-width: 1051px to match mobile breakpoint (max-width: 1050px)
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.desktop {
+  .landing-card {
+    max-width: 900px;
+  }
+}
+
+/* Section headings */
+.landing-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+}
+
+/* Mode selector fieldset */
+.landing-mode-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.landing-mode-fieldset legend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.landing-mode-group {
+  display: flex;
+  gap: 12px;
+}
+
+.landing-mode-option {
+  flex: 1;
+  position: relative;
+}
+
+.landing-mode-option input[type="radio"] {
+  /* Bug Fix: Safari-compatible visually hidden approach */
+  /* Safari has issues with clip/clip-path on focusable elements */
+  /* This approach keeps the input accessible and tabbable across all browsers */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01%; /* Near-zero opacity - Safari allows tab on this unlike opacity: 0 */
+  cursor: pointer;
+  z-index: 1;
+  margin: 0;
+}
+
+.landing-mode-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: var(--landing-padding-card);
+  background: var(--landing-bg-card);
+  border: var(--landing-border-interactive) solid transparent;
+  border-radius: var(--landing-radius-card);
+  cursor: pointer;
+  transition: all var(--landing-transition-base), transform var(--landing-transition-base);
+}
+
+.landing-mode-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-accent-primary, #39d353);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0%;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.landing-mode-check svg {
+  width: 12px;
+  height: 12px;
+  /* Use theme-configurable text color for contrast on accent background */
+  color: var(--color-text-on-accent, #fff);
+}
+
+.landing-mode-option input[type="radio"]:checked + .landing-mode-label .landing-mode-check {
+  opacity: 100%;
+  transform: scale(1);
+}
+
+.landing-mode-option input[type="radio"]:checked + .landing-mode-label {
+  background: color-mix(in srgb, var(--color-accent-primary, #39d353) 10%, transparent);
+  border-color: var(--color-accent-primary, #39d353);
+}
+
+.landing-mode-option input[type="radio"]:focus-visible + .landing-mode-label {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Hover effect: slight upward movement and grey border (consistent with theme cards) */
+.landing-mode-option:hover .landing-mode-label {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-text-muted);
+  transform: translateY(-2px);
+}
+
+.landing-mode-icon {
+  font-size: 1.5rem;
+}
+
+.landing-mode-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.landing-mode-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.landing-mode-subtitle {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.landing-mode-description {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+/* Form sections */
+.landing-form-section {
+  margin-bottom: 24px;
+}
+
+.landing-form-section[hidden] {
+  display: none;
+}
+
+/* Input label */
+.landing-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+/* Date input */
+.landing-date-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 42px;
+  height: 42px;
+  /* Prevent datetime-local from expanding beyond container */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.landing-date-input:hover {
+  border-color: var(--color-border);
+}
+
+.landing-date-input:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
+}
+
+/* Invalid state for date input */
+.landing-date-input.is-invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.landing-date-input.is-invalid:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+/* Duration inputs */
+.landing-duration-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.landing-duration-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.landing-duration-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.landing-duration-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: var(--control-height);
+}
+
+.landing-duration-input:hover {
+  border-color: var(--color-border);
+}
+
+.landing-duration-input:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
+}
+
+/* Invalid state for duration inputs */
+.landing-duration-input.is-invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.landing-duration-input.is-invalid:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.landing-duration-input::placeholder {
+  color: var(--color-border);
+}
+
+/* Duration preview */
+.landing-duration-preview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  min-height: 40px;
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.landing-duration-preview:empty {
+  visibility: hidden;
+}
+
+/* Message input */
+.landing-message-input {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-message-input:hover {
+  border-color: var(--color-border);
+}
+
+.landing-message-input:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
+}
+
+/* Invalid state for message input */
+.landing-message-input.is-invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.landing-message-input.is-invalid:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.landing-message-input::placeholder {
+  color: var(--color-border);
+}
+
+/* Inline field error message */
+.landing-field-error {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-error);
+  margin-top: 6px;
+  padding-left: 2px;
+}
+
+.landing-field-error[hidden] {
+  display: none;
+}
+
+/* Theme section using shared theme-selector component */
+.landing-theme-section {
+  margin-bottom: 24px;
+}
+
+.landing-theme-selector-wrapper {
+  margin-top: 8px;
+}
+
+/* Override theme-selector styles for landing page integration */
+.landing-theme-selector-wrapper .theme-selector {
+  max-width: 100%;
+}
+
+/* Show search on landing page - provides filter capability even with few themes */
+/* To hide: use .landing-theme-selector-wrapper .theme-selector-search-section { display: none; } */
+
+/* 
+ * Theme grid responsive behavior is handled by the shared .theme-selector-grid styles.
+ * Both landing page and modal use the same breakpoints:
+ * - Desktop/Tablet: side-by-side (auto-fill columns)
+ * - Mobile (<540px): single column for better UX
+ */
+
+/* Slightly smaller cards on landing page */
+.landing-theme-selector-wrapper .theme-selector-card {
+  aspect-ratio: 16 / 9;
+}
+
+/* Timezone section */
+.landing-timezone-section {
+  margin-bottom: 24px;
+}
+
+.landing-timezone-wrapper {
+  position: relative;
+  /* Ensure dropdown appears above footer when expanded */
+  z-index: 10;
+}
+
+/* Timezone selector trigger - matching timezone-selector component */
+.timezone-selector-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.timezone-selector-trigger:hover {
+  border-color: var(--color-border);
+}
+
+.timezone-selector-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+/* Timezone dropdown - styles handled by component for inline mode */
+/* Only add styles that don't conflict with component's positioning */
+.landing-timezone-wrapper .timezone-dropdown {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.dropdown-option:hover {
+  background: var(--color-surface-elevated) !important;
+}
+
+.dropdown-option:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Display options section */
+.landing-display-options-section {
+  /* Consistent spacing with other sections */
+}
+
+/* World map toggle */
+.landing-map-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--landing-padding-card);
+  background: var(--landing-bg-input);
+  border: var(--landing-border-interactive) solid var(--landing-border-default);
+  border-radius: var(--landing-radius-card);
+  cursor: pointer;
+  transition: all var(--landing-transition-base), transform var(--landing-transition-base);
+}
+
+/* Hover effect: slight upward movement and grey border (consistent with theme cards) */
+.landing-map-toggle:hover {
+  border-color: var(--color-text-muted);
+  transform: translateY(-2px);
+}
+
+.landing-map-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.landing-map-toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: var(--color-border);
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.landing-map-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-text-muted);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.landing-map-toggle.is-on .landing-map-toggle-switch {
+  background: var(--color-accent-primary, #39d353);
+}
+
+.landing-map-toggle.is-on .landing-map-toggle-switch::after {
+  left: 22px;
+  /* Use theme-configurable text color for contrast on accent background */
+  background: var(--color-text-on-accent, #fff);
+}
+
+/* World map preview */
+.landing-world-map {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  max-height: 200px;
+}
+
+.landing-world-map[hidden] {
+  display: none;
+}
+
+/* Start button - clean style with consistent hover effect */
+.landing-start-button {
+  width: 100%;
+  padding: var(--landing-padding-card) 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  /* Use contrast-aware text color for WCAG AA compliance on accent background */
+  color: var(--color-text-on-accent-primary, #0d1117);
+  background: var(--color-accent-primary, #39d353);
+  border: var(--landing-border-interactive) solid var(--color-accent-primary, #39d353);
+  border-radius: var(--landing-radius-card);
+  cursor: pointer;
+  transition: background-color var(--landing-transition-base), border-color var(--landing-transition-base), transform var(--landing-transition-base);
+}
+
+/* Hover effect: slight upward movement and grey border (consistent with theme cards) */
+.landing-start-button:hover {
+  background: color-mix(in srgb, var(--color-accent-primary, #39d353) 80%, black);
+  border-color: var(--color-text-muted);
+  transform: translateY(-2px);
+}
+
+.landing-start-button:active {
+  transform: translateY(0);
+}
+
+.landing-start-button:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Footer */
+.landing-footer {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  /* Match card responsive max-width */
+  max-width: min(calc(100% - 48px), 720px);
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 12px;
+}
+
+/* Desktop: match card width
+ * Uses min-width: 1051px to match mobile breakpoint (max-width: 1050px)
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.desktop {
+  .landing-footer {
+    max-width: 900px;
+  }
+}
+
+.landing-footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.landing-footer-attribution {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.landing-footer-attribution a {
+  color: var(--color-accent-secondary, #58a6ff);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing-footer-attribution a:hover {
+  /* Darken secondary color by mixing with black (20% darker) */
+  color: color-mix(in srgb, var(--color-accent-secondary, #58a6ff) 80%, black);
+  text-decoration: underline;
+}
+
+.landing-footer-attribution a:focus-visible {
+  outline: 2px solid var(--color-accent-secondary, #58a6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Copilot link with inline icon */
+.landing-footer-copilot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+
+.landing-footer-copilot-link svg {
+  flex-shrink: 0;
+}
+
+.landing-footer-powered {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-footer-powered-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.landing-footer-tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+.landing-footer-tech-list a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing-footer-tech-list a:hover {
+  color: var(--color-accent-secondary, #58a6ff);
+}
+
+.landing-footer-tech-list a:focus-visible {
+  outline: 2px solid var(--color-accent-secondary, #58a6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.landing-footer-separator {
+  color: var(--color-border);
+  user-select: none;
+}
+
+.landing-footer-repo {
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.landing-footer-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.landing-footer-repo-link:hover {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.landing-footer-repo-link:focus-visible {
+  outline: 2px solid var(--color-accent-secondary, #58a6ff);
+  outline-offset: 2px;
+}
+
+.landing-footer-repo-link svg {
+  flex-shrink: 0;
+}
+
+/* Contribute theme link - uses theme primary accent */
+.landing-footer-theme-link {
+  background: color-mix(in srgb, var(--color-accent-primary, #39d353) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-primary, #39d353) 30%, transparent);
+}
+
+.landing-footer-theme-link:hover {
+  background: color-mix(in srgb, var(--color-accent-primary, #39d353) 15%, transparent);
+  border-color: var(--color-accent-primary, #39d353);
+}
+
+/* Star on GitHub link - uses theme secondary accent */
+.landing-footer-star-link {
+  background: color-mix(in srgb, var(--color-accent-secondary, #58a6ff) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-secondary, #58a6ff) 30%, transparent);
+}
+
+.landing-footer-star-link:hover {
+  background: color-mix(in srgb, var(--color-accent-secondary, #58a6ff) 15%, transparent);
+  border-color: var(--color-accent-secondary, #58a6ff);
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .landing-star,
+  .landing-github-square {
+    animation: none;
+    opacity: 60%;
+  }
+  
+  .landing-theme-card,
+  .landing-start-button,
+  .landing-mode-label,
+  .landing-map-toggle,
+  .landing-map-toggle-switch,
+  .landing-map-toggle-switch::after {
+    transition: none;
+  }
+  
+  /* Disable hover transforms for users who prefer reduced motion */
+  .landing-mode-option:hover .landing-mode-label,
+  .landing-start-button:hover,
+  .landing-map-toggle:hover {
+    transform: none;
+  }
+}
+
+/* Responsive styles
+ * IMPORTANT: Use 1050px breakpoint consistently across all components
+ * to prevent layout flickering during resize. This matches theme-selector.css.
+ * - Mobile (≤1050px): Single column layouts, reduced spacing
+ * - Desktop (>1050px): Multi-column layouts
+ */
+@include bp.mobile {
+  /* Reduce spacing on mobile - more screen real estate for content */
+  .landing-wrapper {
+    padding: 24px;
+  }
+
+  .landing-card {
+    margin-top: 0;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .landing-title {
+    font-size: 1.75rem;
+  }
+
+  .landing-mode-group {
+    flex-direction: column;
+  }
+
+  .landing-footer {
+    padding: 16px;
+  }
+
+  .landing-footer-tech-list {
+    font-size: 0.75rem;
+  }
+
+  /* Center color mode toggle on mobile */
+  .landing-header > .color-mode-toggle {
+    align-self: center;
+  }
+}

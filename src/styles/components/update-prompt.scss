@@ -1,0 +1,148 @@
+/**
+ * Update Prompt Styles
+ * Toast notification component for PWA update availability.
+ *
+ * Responsive positioning:
+ * - Desktop (>1050px): top-center with slide-down animation
+ * - Mobile (≤1050px): bottom-center with slide-up animation
+ *
+ * Accessibility features:
+ * - :focus-visible outlines for keyboard navigation
+ * - Minimum 44px touch targets for buttons
+ * - prefers-reduced-motion support
+ */
+@use '../base/_breakpoints' as bp;
+
+/* ==========================================================================
+   Container - Fixed positioning with responsive placement
+   ========================================================================== */
+
+.update-prompt-container {
+  position: fixed;
+  z-index: 9999;
+  max-width: 400px;
+  width: calc(100% - 2rem);
+  opacity: 0%;
+  pointer-events: none;
+
+  /* Desktop default: top-center */
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-1rem);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.update-prompt-container--visible {
+  opacity: 100%;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.update-prompt-container--no-animation {
+  transition: none;
+}
+
+/* Mobile: bottom-center positioning */
+@include bp.mobile {
+  .update-prompt-container {
+    top: auto;
+    bottom: 1rem;
+    transform: translateX(-50%) translateY(1rem);
+  }
+
+  .update-prompt-container--visible {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Toast - Main notification card
+   ========================================================================== */
+
+.update-prompt-toast {
+  background-color: var(--color-surface, #161b22);
+  color: var(--color-text, #fff);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--color-border, #30363d);
+}
+
+.update-prompt-message {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   Buttons - Accessible touch targets with focus states
+   ========================================================================== */
+
+.update-prompt-refresh-btn {
+  background-color: var(--color-success);
+  /* Use theme-configurable text color for guaranteed contrast on success background */
+  color: var(--color-text-on-success, #fff);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.2s ease;
+}
+
+.update-prompt-refresh-btn:hover {
+  filter: brightness(1.1);
+}
+
+.update-prompt-refresh-btn:focus-visible {
+  outline: 3px solid var(--color-focus, #58a6ff);
+  outline-offset: 2px;
+}
+
+.update-prompt-dismiss-btn {
+  background: transparent;
+  color: var(--color-text-muted, #8b949e);
+  border: none;
+  padding: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.update-prompt-dismiss-btn:hover {
+  color: var(--color-text, #fff);
+}
+
+.update-prompt-dismiss-btn:focus-visible {
+  outline: 3px solid var(--color-focus, #58a6ff);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Reduced Motion Support
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .update-prompt-container {
+    transition: none;
+  }
+
+  .update-prompt-refresh-btn,
+  .update-prompt-dismiss-btn {
+    transition: none;
+  }
+}

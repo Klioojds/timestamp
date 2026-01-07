@@ -1,0 +1,238 @@
+/**
+ * Timezone Selector Styles
+ *
+ * Component styles for the timezone dropdown selector.
+ * Supports both inline (forms) and fixed (overlay) positioning modes.
+ */
+
+/* Base CSS custom properties for theming */
+.timezone-selector-wrapper {
+  --tz-bg: var(--theme-tz-bg, var(--color-surface-elevated));
+  --tz-border: var(--theme-tz-border, var(--color-border));
+  --tz-text: var(--theme-tz-text, var(--color-text));
+  --tz-text-muted: var(--theme-tz-text-muted, var(--color-text-muted));
+  --tz-accent: var(--theme-tz-accent, var(--color-accent-secondary));
+  --tz-celebrating: var(--color-accent-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.timezone-selector {
+  position: relative;
+}
+
+/* Trigger button */
+.timezone-selector-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--tz-bg);
+  border: 1px solid var(--tz-border);
+  color: var(--tz-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.timezone-selector-trigger:hover {
+  border-color: var(--tz-accent);
+}
+
+.timezone-selector-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--tz-accent);
+}
+
+/* Trigger text layout */
+.selector-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.selector-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tz-text-muted);
+}
+
+.selector-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tz-text);
+  flex: 1;
+}
+
+/* Chevron icon */
+.selector-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--tz-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.timezone-selector-trigger[aria-expanded="true"] .selector-chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown container */
+.timezone-dropdown {
+  background: var(--tz-bg);
+  border: 1px solid var(--tz-border);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Search section */
+.dropdown-search {
+  padding: 8px;
+  border-bottom: 1px solid var(--tz-border);
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--color-input);
+  border: 1px solid var(--tz-border);
+  color: var(--tz-text);
+  font-size: 14px;
+}
+
+.search-input::placeholder {
+  color: var(--tz-text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--tz-accent);
+}
+
+/* Dropdown list */
+.dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dropdown-group {
+  padding: 4px 0;
+}
+
+.group-label {
+  padding: 6px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tz-text-muted);
+}
+
+/* Dropdown options */
+.dropdown-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--tz-text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.dropdown-option:hover {
+  background: color-mix(in srgb, var(--tz-accent) 10%, transparent);
+}
+
+.dropdown-option:focus,
+.dropdown-option:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--tz-accent) 20%, transparent);
+  box-shadow: inset 0 0 0 2px var(--tz-accent);
+}
+
+.dropdown-option.selected {
+  background: color-mix(in srgb, var(--tz-accent) 15%, transparent);
+}
+
+/* Option indicator (celebration dot) */
+.option-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tz-text-muted);
+  flex-shrink: 0;
+}
+
+.option-indicator.celebrating {
+  background: var(--tz-celebrating);
+  box-shadow: 0 0 8px var(--tz-celebrating);
+}
+
+/* Option text */
+.option-label {
+  flex: 1;
+  font-size: 14px;
+}
+
+.option-offset {
+  font-size: 12px;
+  color: var(--tz-text-muted);
+}
+
+/* Empty state */
+.dropdown-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--tz-text-muted);
+}
+
+/* ============================================
+   Position variants (inline vs fixed)
+   ============================================ */
+
+/* Inline mode (used in forms) */
+.timezone-selector-wrapper--inline {
+  position: relative;
+}
+
+.timezone-selector-wrapper--inline .timezone-selector {
+  width: 100%;
+}
+
+.timezone-selector-wrapper--inline .timezone-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Fixed mode (used in overlays) */
+.timezone-selector-wrapper--fixed {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 100;
+}
+
+.timezone-selector-wrapper--fixed .timezone-selector {
+  width: 220px;
+}
+
+.timezone-selector-wrapper--fixed .timezone-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 8px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}

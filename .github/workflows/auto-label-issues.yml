@@ -1,0 +1,404 @@
+# Auto-label Issues Workflow
+#
+# PURPOSE: Automatically applies additional labels to issues based on form responses
+#
+# This consolidated workflow handles labelling for:
+# - Bug reports: theme/*, browser/*, os/* labels
+# - Feature requests: feature/* category + contributor/* implementation labels  
+# - Theme suggestions: contributor/* implementation labels
+#
+# How it works:
+# 1. Issue templates apply base labels (bug, feature, new-theme) when issue is created
+# 2. This workflow triggers on opened/edited and parses form field responses
+# 3. Applies corresponding labels for filtering and triage
+# 4. Removes stale labels when form values change on edit
+name: Auto-label Issues
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  # =============================================================================
+  # Bug Report Labelling
+  # Applies: theme/*, browser/*, os/* labels
+  # =============================================================================
+  label-bug-report:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'bug')
+    timeout-minutes: 2
+    steps:
+      # Fetch theme labels dynamically from repository
+      # The sync-theme-metadata workflow creates theme/* labels from THEME_REGISTRY,
+      # with descriptions containing the theme's display name for matching.
+      - name: Parse bug report and apply labels
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const issueBody = context.payload.issue.body || '';
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+
+            // Get current labels on the issue to detect stale labels that need removal
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+            console.log(`📋 Current labels: ${currentLabels.join(', ')}`);
+
+            // ===== THEME PARSING =====
+            // Fetch all theme/* labels from the repository
+            // These are created/maintained by sync-theme-metadata workflow
+            // Each label has a description like "Issues related to the Fireworks Celebration theme"
+            const { data: repoLabels } = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            // Build a map of display name → label name
+            // Parse the description to extract the theme display name
+            // Format: "Issues related to the {Theme Name} theme"
+            const themeNameToLabel = new Map();
+            const themeLabels = [];
+            
+            for (const label of repoLabels) {
+              if (!label.name.startsWith('theme/')) continue;
+              
+              themeLabels.push(label.name);
+              
+              // Extract theme display name from description
+              // Pattern: "Issues related to the {Name} theme"
+              if (label.description) {
+                const match = label.description.match(/Issues related to the (.+) theme/);
+                if (match) {
+                  const displayName = match[1];
+                  themeNameToLabel.set(displayName, label.name);
+                  console.log(`   Mapped: "${displayName}" → ${label.name}`);
+                }
+              }
+            }
+            
+            console.log(`📋 Found ${themeLabels.length} theme labels`);
+
+            const themeMatch = issueBody.match(/### Theme\s*\n\s*\n(.+)/);
+            if (themeMatch) {
+              const themeSelection = themeMatch[1].trim();
+              console.log(`🎨 User selected theme: "${themeSelection}"`);
+
+              // Determine which theme label should be applied (if any)
+              let matchedLabel = null;
+              
+              if (themeSelection === 'Not applicable / Not sure') {
+                console.log('ℹ️ Theme not applicable - skipping theme label');
+              } else {
+                // First try exact match on display name (most reliable)
+                matchedLabel = themeNameToLabel.get(themeSelection);
+                
+                if (!matchedLabel) {
+                  // Fallback: try fuzzy matching on theme ID
+                  const kebabSelection = themeSelection
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+                  
+                  for (const label of themeLabels) {
+                    const themeId = label.replace('theme/', '');
+                    if (kebabSelection === themeId || kebabSelection.includes(themeId)) {
+                      matchedLabel = label;
+                      console.log(`   Fuzzy matched: "${themeSelection}" → ${label}`);
+                      break;
+                    }
+                  }
+                }
+
+                if (matchedLabel) {
+                  labelsToAdd.push(matchedLabel);
+                  labelsToAdd.push('theme');
+                  labelsToAdd.push('existing-theme');
+                  console.log(`✓ Matched theme label: ${matchedLabel}`);
+                } else {
+                  console.log(`⚠️ No matching theme label found for "${themeSelection}"`);
+                  console.log('   Available mappings:', Object.fromEntries(themeNameToLabel));
+                  console.log('   Run sync-theme-metadata workflow to create missing labels');
+                }
+              }
+              
+              // Find stale theme labels to remove (any theme/* label that isn't the matched one)
+              for (const currentLabel of currentLabels) {
+                if (currentLabel.startsWith('theme/') && currentLabel !== matchedLabel) {
+                  labelsToRemove.push(currentLabel);
+                  console.log(`🗑️ Will remove stale theme label: ${currentLabel}`);
+                }
+              }
+            }
+
+            // ===== BROWSER PARSING =====
+            const browserMatch = issueBody.match(/### Browser\s*\n\s*\n(.+)/);
+            if (browserMatch) {
+              const browser = browserMatch[1].trim();
+              console.log(`🌐 Detected browser: "${browser}"`);
+
+              const browserLabelMap = {
+                'Chrome': 'browser/chrome',
+                'Firefox': 'browser/firefox',
+                'Safari': 'browser/safari',
+                'Edge': 'browser/edge',
+                'Mobile Chrome (Android)': 'browser/mobile-chrome',
+                'Mobile Safari (iOS)': 'browser/mobile-safari',
+                'Other': 'browser/other'
+              };
+
+              const browserLabel = browserLabelMap[browser];
+              if (browserLabel) {
+                labelsToAdd.push(browserLabel);
+              }
+              
+              // Find stale browser labels to remove
+              const allBrowserLabels = Object.values(browserLabelMap);
+              for (const currentLabel of currentLabels) {
+                if (currentLabel.startsWith('browser/') && currentLabel !== browserLabel) {
+                  labelsToRemove.push(currentLabel);
+                  console.log(`🗑️ Will remove stale browser label: ${currentLabel}`);
+                }
+              }
+            }
+
+            // ===== OPERATING SYSTEM PARSING =====
+            const osMatch = issueBody.match(/### Operating System\s*\n\s*\n(.+)/);
+            if (osMatch) {
+              const os = osMatch[1].trim();
+              console.log(`💻 Detected OS: "${os}"`);
+
+              const osLabelMap = {
+                'Windows': 'os/windows',
+                'macOS': 'os/macos',
+                'Linux': 'os/linux',
+                'iOS': 'os/ios',
+                'Android': 'os/android',
+                'Other': 'os/other'
+              };
+
+              const osLabel = osLabelMap[os];
+              if (osLabel) {
+                labelsToAdd.push(osLabel);
+              }
+              
+              // Find stale OS labels to remove
+              for (const currentLabel of currentLabels) {
+                if (currentLabel.startsWith('os/') && currentLabel !== osLabel) {
+                  labelsToRemove.push(currentLabel);
+                  console.log(`🗑️ Will remove stale OS label: ${currentLabel}`);
+                }
+              }
+            }
+
+            // ===== REMOVE STALE LABELS =====
+            if (labelsToRemove.length > 0) {
+              console.log(`🗑️ Removing stale labels: ${labelsToRemove.join(', ')}`);
+              for (const label of labelsToRemove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.payload.issue.number,
+                    name: label
+                  });
+                  console.log(`✓ Removed: ${label}`);
+                } catch (error) {
+                  // Label might not exist on the issue - that's okay
+                  console.log(`⚠️ Could not remove ${label}: ${error.message}`);
+                }
+              }
+            }
+
+            // ===== ADD NEW LABELS =====
+            if (labelsToAdd.length === 0) {
+              console.log('ℹ️ No labels to add');
+              return;
+            }
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: labelsToAdd
+              });
+              console.log(`✅ Applied labels: ${labelsToAdd.join(', ')}`);
+            } catch (error) {
+              console.error('❌ Failed to apply labels:', error.message);
+              throw error;
+            }
+
+  # =============================================================================
+  # Feature Request Labelling
+  # Applies: feature/* labels based on category + contributor/* labels for implementation
+  # =============================================================================
+  label-feature-request:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'feature')
+    timeout-minutes: 2
+    steps:
+      - name: Parse feature request and apply labels
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            // SECURITY: User input is only used for regex matching and dictionary lookups.
+
+            const issueBody = context.payload.issue.body || '';
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+
+            // ===== CATEGORY PARSING =====
+            const categoryMatch = issueBody.match(/### Feature Category\s*\n\s*\n(.+)/);
+            if (categoryMatch) {
+              const category = categoryMatch[1].trim();
+              console.log(`📋 Category: "${category}"`);
+
+              const categoryLabelMap = {
+                'Accessibility': 'feature/accessibility',
+                'Countdown Mode Enhancement': 'feature/countdown-mode-enhancement',
+                'Developer Experience': 'feature/developer-experience',
+                'Documentation': 'feature/documentation',
+                'Other': 'feature/other',
+                'Performance Optimization': 'feature/performance-optimization',
+                'PWA / Offline Support': 'feature/pwa-offline-support',
+                'UI/UX Improvement': 'feature/ui-ux-improvement'
+              };
+
+              const categoryLabel = categoryLabelMap[category];
+              if (categoryLabel) {
+                labelsToAdd.push(categoryLabel);
+                for (const currentLabel of currentLabels) {
+                  if (currentLabel.startsWith('feature/') && currentLabel !== categoryLabel) {
+                    labelsToRemove.push(currentLabel);
+                  }
+                }
+              }
+            }
+
+            // ===== IMPLEMENTATION INTEREST PARSING =====
+            const implementationMatch = issueBody.match(
+              /### Would you like to implement this\?\s*\n\s*\n(.+)/
+            );
+            if (implementationMatch) {
+              const selection = implementationMatch[1].trim();
+              console.log(`👤 Implementation: "${selection}"`);
+
+              const implementationLabelMap = {
+                "I'd like to implement this myself": 'contributor/self-implementing',
+                "I could implement it with some guidance": 'contributor/needs-guidance',
+                "I'm just suggesting the idea": 'help-wanted'
+              };
+
+              const implementationLabel = implementationLabelMap[selection];
+              if (implementationLabel) {
+                labelsToAdd.push(implementationLabel);
+                const allImplLabels = Object.values(implementationLabelMap);
+                for (const currentLabel of currentLabels) {
+                  if (allImplLabels.includes(currentLabel) && currentLabel !== implementationLabel) {
+                    labelsToRemove.push(currentLabel);
+                  }
+                }
+              }
+            }
+
+            // ===== REMOVE STALE LABELS =====
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.issue.number,
+                  name: label
+                });
+                console.log(`🗑️ Removed: ${label}`);
+              } catch (error) {
+                console.log(`⚠️ Could not remove ${label}: ${error.message}`);
+              }
+            }
+
+            // ===== ADD NEW LABELS =====
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: labelsToAdd
+              });
+              console.log(`✅ Applied: ${labelsToAdd.join(', ')}`);
+            }
+
+  # =============================================================================
+  # Theme Suggestion Labelling
+  # Applies: contributor/self-implementing, contributor/needs-guidance, or help-wanted
+  # =============================================================================
+  label-theme-suggestion:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'new-theme')
+    timeout-minutes: 2
+    steps:
+      - name: Parse implementation interest and apply label
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            // SECURITY: User input is only used for regex matching and dictionary lookups.
+
+            const issueBody = context.payload.issue.body || '';
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+
+            // Parse the "Would you like to implement this theme?" dropdown
+            const implementationMatch = issueBody.match(
+              /### Would you like to implement this theme\?\s*\n\s*\n(.+)/
+            );
+
+            if (!implementationMatch) {
+              console.log('❌ Implementation interest section not found');
+              return;
+            }
+
+            const selection = implementationMatch[1].trim();
+            console.log(`👤 Implementation: "${selection}"`);
+
+            // Map dropdown options to labels
+            const labelMap = {
+              "I'd like to implement this myself": 'contributor/self-implementing',
+              "I could implement it with some guidance": 'contributor/needs-guidance',
+              "I'm just sharing the idea for others to implement": 'help-wanted'
+            };
+
+            const newLabel = labelMap[selection];
+            if (!newLabel) {
+              console.log(`⚠️ Unknown selection: "${selection}"`);
+              return;
+            }
+
+            // Remove stale implementation labels
+            const allLabels = Object.values(labelMap);
+            for (const currentLabel of currentLabels) {
+              if (allLabels.includes(currentLabel) && currentLabel !== newLabel) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.payload.issue.number,
+                    name: currentLabel
+                  });
+                  console.log(`🗑️ Removed: ${currentLabel}`);
+                } catch (error) {
+                  console.log(`⚠️ Could not remove ${currentLabel}: ${error.message}`);
+                }
+              }
+            }
+
+            // Add the new label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: [newLabel]
+            });
+            console.log(`✅ Applied: ${newLabel}`);

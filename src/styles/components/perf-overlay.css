@@ -1,0 +1,221 @@
+/**
+ * Performance Overlay Styles
+ *
+ * Dev-only styles for the performance monitoring overlay.
+ * Only imported when profiling is enabled.
+ *
+ * @remarks
+ * These styles are conditionally imported in perf-overlay.ts:
+ * `if (import.meta.env.DEV) import './perf-overlay.css'`
+ */
+
+.perf-overlay {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 99999;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  background: rgb(13 17 23 / 95%);
+  color: var(--color-text, #e6edf3);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+  min-width: 280px;
+  max-width: 400px;
+  user-select: none;
+  backdrop-filter: blur(8px);
+}
+
+.perf-overlay__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgb(48 54 61 / 50%);
+  border-radius: 7px 7px 0 0;
+  cursor: grab;
+  border-bottom: 1px solid var(--color-border, #30363d);
+}
+
+.perf-overlay__header:active {
+  cursor: grabbing;
+}
+
+.perf-overlay__title {
+  font-weight: 600;
+  color: var(--color-focus-ring, #58a6ff);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perf-overlay__title::before {
+  content: '⚡';
+}
+
+.perf-overlay__controls {
+  display: flex;
+  gap: 4px;
+}
+
+.perf-overlay__btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #8b949e);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.perf-overlay__btn:hover {
+  background: rgb(255 255 255 / 10%);
+  color: var(--color-text, #e6edf3);
+}
+
+.perf-overlay__btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+.perf-overlay__body {
+  padding: 12px;
+}
+
+.perf-overlay__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.perf-overlay__metric {
+  background: rgb(48 54 61 / 30%);
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.perf-overlay__metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.perf-overlay__metric-label {
+  font-size: 10px;
+  color: var(--color-text-muted, #8b949e);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perf-overlay__metric--good .perf-overlay__metric-value {
+  color: var(--color-success, #3fb950);
+}
+
+.perf-overlay__metric--warn .perf-overlay__metric-value {
+  color: #d29922;
+}
+
+.perf-overlay__metric--bad .perf-overlay__metric-value {
+  color: var(--color-error);
+}
+
+.perf-overlay__expand-btn {
+  width: 100%;
+  background: rgb(48 54 61 / 30%);
+  border: 1px solid var(--color-border, #30363d);
+  color: var(--color-text-muted, #8b949e);
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.perf-overlay__expand-btn:hover {
+  background: rgb(48 54 61 / 50%);
+  color: var(--color-text, #e6edf3);
+}
+
+.perf-overlay__expand-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+.perf-overlay__details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border, #30363d);
+  display: none;
+}
+
+.perf-overlay__details.is-expanded {
+  display: block;
+}
+
+.perf-overlay__section-title {
+  font-size: 10px;
+  color: var(--color-text-muted, #8b949e);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.perf-overlay__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 10px;
+}
+
+.perf-overlay__stat {
+  background: rgb(48 54 61 / 30%);
+  padding: 4px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+.perf-overlay__stat-label {
+  color: var(--color-text-muted, #8b949e);
+}
+
+.perf-overlay__stat-value {
+  font-weight: 600;
+  color: var(--color-text, #e6edf3);
+}
+
+.perf-overlay__operations {
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 10px;
+}
+
+.perf-overlay__op {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid rgb(48 54 61 / 50%);
+}
+
+.perf-overlay__op:last-child {
+  border-bottom: none;
+}
+
+.perf-overlay__op-label {
+  color: var(--color-text-muted, #8b949e);
+}
+
+.perf-overlay__op-time {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .perf-overlay {
+    backdrop-filter: none;
+    transition: none;
+  }
+}

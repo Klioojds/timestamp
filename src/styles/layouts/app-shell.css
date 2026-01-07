@@ -1,0 +1,159 @@
+/**
+ * App Shell Layout Styles
+ * Base styles and main app layout containers.
+ */
+
+/* CSS Custom Properties - Color System
+ * 
+ * PRIORITY ORDER (lowest to highest):
+ * 1. These :root defaults (lowest)
+ * 2. [data-color-mode] selectors below
+ * 3. Theme's styles.css can override via same selectors
+ * 4. ThemeConfig.colors applied as inline styles (highest)
+ *
+ * Keep in sync with COLOR_SCHEME_DEFAULTS in color-scheme-defaults.ts
+ */
+:root {
+  /* Base colors - defaults for dark mode (matches COLOR_SCHEME_DEFAULTS.dark) */
+  --color-background: #0d1117;
+  --color-text: #f0f6fc;
+  --color-text-muted: #8b949e;
+  --color-accent-primary: #39d353;
+  --color-text-on-accent: #fff;
+  /* Dark text on bright green for WCAG AA contrast (4.5:1+) */
+  --color-text-on-accent-primary: #0d1117;
+  --color-accent-secondary: #58a6ff;
+  --color-accent-tertiary: #39d353;
+  --color-surface: rgb(13 17 23 / 95%);
+  --color-surface-elevated: rgb(48 54 61 / 50%);
+  --color-input: rgb(13 17 23 / 80%);
+  --color-border: #30363d;
+  --color-border-muted: #21262d;
+  --color-error: #f85149;
+  --color-success: #238636;
+  --color-text-on-success: #fff;
+  --color-focus-ring: #58a6ff;
+  /* Legacy aliases */
+  --color-link: #58a6ff;
+  --color-link-hover: #79c0ff;
+  --color-primary: #58a6ff;
+}
+
+/* Dark mode explicit colors (matches COLOR_SCHEME_DEFAULTS.dark) */
+[data-color-mode="dark"] {
+  --color-background: #0d1117;
+  --color-text: #f0f6fc;
+  --color-text-muted: #8b949e;
+  --color-accent-primary: #39d353;
+  --color-text-on-accent: #fff;
+  /* Dark text on bright green for WCAG AA contrast (4.5:1+) */
+  --color-text-on-accent-primary: #0d1117;
+  --color-accent-secondary: #58a6ff;
+  --color-accent-tertiary: #39d353;
+  --color-surface: rgb(13 17 23 / 95%);
+  --color-surface-elevated: rgb(48 54 61 / 50%);
+  --color-input: rgb(13 17 23 / 80%);
+  --color-border: #30363d;
+  --color-border-muted: #21262d;
+  --color-error: #f85149;
+  --color-success: #238636;
+  --color-text-on-success: #fff;
+  --color-focus-ring: #58a6ff;
+  --color-link: #58a6ff;
+  --color-link-hover: #79c0ff;
+  --color-primary: #58a6ff;
+}
+
+/* Light mode colors (matches COLOR_SCHEME_DEFAULTS.light) */
+[data-color-mode="light"] {
+  --color-background: #fff;
+  --color-text: #1f2328;
+  --color-text-muted: #656d76;
+  --color-accent-primary: #1a7f37;
+  --color-text-on-accent: #fff;
+  /* White on darker green has sufficient contrast */
+  --color-text-on-accent-primary: #fff;
+  --color-accent-secondary: #0969da;
+  --color-accent-tertiary: #1a7f37;
+  --color-surface: rgb(255 255 255 / 95%);
+  --color-surface-elevated: rgb(246 248 250 / 80%);
+  --color-input: rgb(255 255 255 / 80%);
+  --color-border: #d0d7de;
+  --color-border-muted: #d8dee4;
+  --color-error: #cf222e;
+  --color-success: #1a7f37;
+  --color-text-on-success: #fff;
+  --color-focus-ring: #0969da;
+  --color-link: #0969da;
+  --color-link-hover: #0550ae;
+  --color-primary: #0969da;
+}
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Disable all transitions during color mode switching to prevent visual artifacts.
+ * The [data-switching-color-mode] attribute is added/removed by color-applicator.ts */
+[data-switching-color-mode] * {
+  transition: none !important;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  /* overflow: hidden removed - now controlled per-view */
+  /* Landing page needs scrolling, countdown view has overflow hidden via .countdown-view class */
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background-color: var(--color-background, #0d1117);
+  color: var(--color-text, #c9d1d9);
+}
+
+#app {
+  width: 100%;
+  /* Use min-height instead of height to allow content to grow beyond viewport */
+  /* This fixes iOS Safari scrolling issues when landing page content exceeds viewport */
+  min-height: 100%;
+}
+
+/* Countdown view container - centers the contribution grid */
+.countdown-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* =============================================================================
+ * Theme Container Base Styles
+ * =============================================================================
+ * All themes receive a container with [data-theme] attribute from the orchestrator.
+ * These base styles provide fullscreen positioning and centering that all themes need.
+ * Individual themes can override via their own styles (e.g., background color).
+ */
+[data-theme] {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Title styles (if needed) */
+.countdown-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #c9d1d9;
+}

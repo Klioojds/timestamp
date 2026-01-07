@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+dist
+.playwright-mcp
+test-results
+coverage
+dev-dist
+docs/specs
+docs/plans
+docs/audits
+.stryker-tmp
+mutation-report.*

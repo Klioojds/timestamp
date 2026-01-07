@@ -1,0 +1,51 @@
+/**
+ * Chrome Elements Styles
+ * Styles for button container and other chrome elements (Share, Favorite, Theme Switcher, etc.)
+ */
+@use '../base/_breakpoints' as bp;
+
+/* Hamburger menu button width for positioning calculations */
+:root {
+  --hamburger-button-width: 48px;
+  --hamburger-button-gap: 12px;
+}
+
+.countdown-button-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: row; /* Issue #2 fix: explicit horizontal layout */
+  align-items: center;
+  gap: 12px;
+}
+
+/* Issue #1 fix: On mobile, keep button container but hide chrome buttons (they go in hamburger) */
+@include bp.mobile {
+  /* Hide all chrome elements that should be in hamburger menu */
+  .countdown-button-container > button:not(.timer-control-button),
+  .countdown-button-container > a,
+  .countdown-button-container > .share-menu-container,
+  .countdown-button-container > [data-testid="color-mode-toggle"] {
+    display: none !important;
+  }
+
+  /* Timer controls stay visible on mobile but positioned to avoid hamburger menu */
+  .countdown-button-container .timer-controls {
+    display: flex !important;
+    position: fixed;
+    top: 20px;
+    /* Position to the left of hamburger menu using CSS custom property */
+    right: calc(20px + var(--hamburger-button-width) + var(--hamburger-button-gap));
+    left: auto;
+    transform: none;
+    z-index: 10001; /* Above mobile menu button */
+  }
+
+  /* Offline indicator stays visible (informational, not interactive chrome) */
+  .countdown-button-container [data-testid="offline-indicator"] {
+    display: block !important;
+  }
+}
+

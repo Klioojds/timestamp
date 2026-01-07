@@ -1,0 +1,755 @@
+/**
+ * Theme Selector Component Styles
+ * Provides styles for the searchable theme selector UI.
+ */
+@use '../base/_breakpoints' as bp;
+
+.theme-selector {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Search Section */
+.theme-selector-search-section {
+  margin-bottom: 24px;
+}
+
+.theme-selector-search-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.theme-selector-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  min-height: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.theme-selector-search-input:hover {
+  border-color: var(--color-border-hover);
+}
+
+.theme-selector-search-input:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgb(88 166 255 / 30%);
+}
+
+.theme-selector-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Results Count (Screen Reader) */
+.theme-selector-results-count {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Section Titles */
+.theme-selector-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 24px 0 16px;
+}
+
+/* Favorites Section */
+.theme-selector-favorites {
+  margin-bottom: 24px;
+}
+
+.theme-selector-favorites:empty {
+  display: none;
+}
+
+/* Themes Grid
+ * IMPORTANT: Uses explicit column counts instead of auto-fill to prevent
+ * layout flickering during viewport resize. The auto-fill with minmax()
+ * creates ambiguous transition zones where the browser rapidly recalculates
+ * column counts, causing visible flicker in Safari and Chrome.
+ * 
+ * Breakpoints:
+ * - Mobile (≤600px): Single column for better UX and theme clarity
+ * - Tablet/Desktop (>600px): Two columns side-by-side
+ * - Large screens (>900px): Three columns for spacious layouts
+ */
+.theme-selector-grid {
+  display: grid;
+  /* Default: 2 columns for tablet/desktop */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Grid Row (ARIA grid pattern) */
+.theme-selector-row,
+.contribute-theme-row {
+  /* Each row is a subgrid containing all three gridcells */
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  position: relative;
+}
+
+/* Gridcells - the three interactive areas within each theme card */
+.theme-selector-gridcell {
+  /* Base gridcell - positioned using grid */
+}
+
+/* First gridcell: Main theme selection card (takes up the visual grid cell) */
+.theme-selector-row > .theme-selector-card {
+  /* This gridcell contains the full visual card */
+  grid-row: 1;
+  grid-column: 1;
+  position: relative; /* Context for absolutely positioned children */
+  /* Inherits all existing .theme-selector-card styles */
+}
+
+/* Second gridcell: Favorite button cell (overlaid on select cell) */
+.theme-selector-gridcell--favorite {
+  /* Positioned in same grid cell as the card, then absolutely positioned within */
+  grid-row: 1;
+  grid-column: 1;
+  /* Align self to bottom-right corner */
+  align-self: end;
+  justify-self: end;
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1;
+  pointer-events: auto; /* Ensure it receives clicks */
+}
+
+/* Third gridcell: Author link cell (overlaid on select cell) */
+.theme-selector-gridcell--author {
+  /* Positioned in same grid cell as the card, then absolutely positioned within */
+  grid-row: 1;
+  grid-column: 1;
+  /* Align self to bottom-left corner */
+  align-self: end;
+  justify-self: start;
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 1;
+  pointer-events: auto; /* Ensure it receives clicks */
+}
+
+/* Contribute card gridcell */
+.contribute-theme-cell {
+  /* Takes the grid cell position */
+  grid-row: 1;
+  grid-column: 1;
+}
+
+/* Focus styling for gridcells */
+.theme-selector-gridcell--favorite:focus-within,
+.theme-selector-gridcell--author:focus-within {
+  /* Ensure focusable elements within gridcells have visible focus */
+  /* Focus styling is handled by the interactive elements (button/link) themselves */
+}
+
+/* Disable animations under prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .theme-selector-card,
+  .theme-selector-card-overlay,
+  .theme-selector-favorite-btn,
+  .theme-selector-card-author,
+  .theme-selector-card-checkmark {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Large screens: 3 columns
+ * Uses min-width: 1051px to match mobile breakpoint (max-width: 1050px)
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.desktop {
+  .theme-selector-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet: 2 columns (default, no override needed) */
+
+/* Mobile: Single column for better UX and theme clarity
+ * Using max-width: 768px for tablet breakpoint.
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.tablet {
+  .theme-selector-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Theme Card */
+.theme-selector-card {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  background-color: var(--color-surface);
+}
+
+/* PERF: All cards use <img> elements for better browser optimization and lazy loading */
+.theme-selector-card-preview-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+.theme-selector-card:hover {
+  border-color: var(--color-border-hover);
+  transform: translateY(-2px);
+}
+
+.theme-selector-card:focus {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+  border-color: #58a6ff;
+}
+
+.theme-selector-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.theme-selector-card--selected {
+  border-color: var(--color-accent-primary, #39d353) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-primary, #39d353) 20%, transparent);
+}
+
+/* Card Overlay (darkens background on hover) */
+.theme-selector-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgb(13 17 23 / 30%), rgb(13 17 23 / 80%));
+  transition: background 0.2s;
+}
+
+.theme-selector-card:hover .theme-selector-card-overlay {
+  background: linear-gradient(to bottom, rgb(13 17 23 / 20%), rgb(13 17 23 / 70%));
+}
+
+/* Card Content */
+.theme-selector-card-content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  color: #fff;
+}
+
+.theme-selector-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 32px; /* Leave space for author link overlay at bottom */
+  text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+}
+
+/* Bottom row: author on left, favorite on right */
+.theme-selector-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Author Section - constrained width to avatar and handle only */
+.theme-selector-card-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  transition: background-color 0.2s, opacity 0.2s;
+  /* Ensure the clickable area only covers the avatar and handle, not the full card width */
+  width: fit-content;
+}
+
+/* Ensure visited state doesn't change appearance */
+.theme-selector-card-author:visited {
+  color: inherit;
+}
+
+.theme-selector-card-author:hover {
+  background-color: rgb(255 255 255 / 15%);
+}
+
+/* Use focus-visible for keyboard focus only, not click focus */
+.theme-selector-card-author:focus {
+  outline: none;
+}
+
+.theme-selector-card-author:focus-visible {
+  background-color: rgb(88 166 255 / 20%);
+  box-shadow: 0 0 0 2px rgb(88 166 255 / 40%);
+}
+
+.theme-selector-card-author:active {
+  opacity: 80%;
+}
+
+.theme-selector-card-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 20%);
+  object-fit: cover;
+}
+
+.theme-selector-card-author-handle {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 80%);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+}
+
+/* Badge Styles - positioned top-left (opposite checkmark at top-right) */
+.theme-selector-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-selector-badge--new {
+  background-color: var(--color-success);
+  color: #fff;
+}
+
+/* Favorite Button */
+.theme-selector-favorite-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-border-translucent);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+  flex-shrink: 0;
+}
+
+.theme-selector-favorite-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.theme-selector-favorite-btn:focus {
+  outline: none;
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 2px rgb(88 166 255 / 30%);
+}
+
+.theme-selector-favorite-btn[aria-pressed="true"] {
+  color: var(--color-error);
+}
+
+.theme-selector-favorite-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Checkmark (shown when selected) */
+.theme-selector-card-checkmark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-primary, #39d353);
+  border-radius: 50%;
+  /* Use theme-configurable text color for contrast on accent background */
+  color: var(--color-text-on-accent, #fff);
+  opacity: 0%;
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.theme-selector-card--selected .theme-selector-card-checkmark {
+  opacity: 100%;
+  transform: scale(1);
+}
+
+.theme-selector-card-checkmark svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Sentinel for IntersectionObserver */
+.theme-selector-sentinel {
+  height: 1px;
+  grid-column: 1 / -1;
+}
+
+/* Tab Navigation
+ * Implements accessible tab pattern with target size compliance
+ */
+.theme-selector-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.theme-selector-tab {
+  /* Accessibility minimum target size: 24x24px
+   * Using 44x44px which also meets enhanced (AAA) criteria */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+  top: 1px; /* Overlap parent border for clean active state */
+}
+
+.theme-selector-tab:hover {
+  color: var(--color-text);
+}
+
+.theme-selector-tab:focus {
+  outline: none;
+  color: var(--color-text);
+  box-shadow: 0 0 0 3px rgb(88 166 255 / 30%);
+  border-radius: 4px 4px 0 0;
+}
+
+.theme-selector-tab[aria-selected="true"] {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent-primary, #39d353);
+}
+
+/* Tab Panels */
+.theme-selector-tabpanel {
+  /* Panel has own margins handled by section-title and grid */
+}
+
+.theme-selector-tabpanel[hidden] {
+  display: none;
+}
+
+/* Mobile: Adjust tab sizing for better touch targets on small screens */
+@include bp.mobile {
+  .theme-selector-tab {
+    flex: 1; /* Equal width tabs on mobile */
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .theme-selector-card,
+  .theme-selector-card-overlay,
+  .theme-selector-card-checkmark,
+  .theme-selector-favorite-btn,
+  .theme-selector-card-author,
+  .theme-selector-sort-menu,
+  .theme-selector-sort-button,
+  .theme-selector-sort-chevron,
+  .theme-selector-tabs,
+  .theme-selector-tab {
+    transition: none !important;
+  }
+
+  .theme-selector-card:hover {
+    transform: none;
+  }
+}
+
+/* Search and Sort Row */
+.theme-selector-search-sort-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.theme-selector-search-sort-row .theme-selector-search-section {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Sort Dropdown */
+.theme-selector-sort {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.theme-selector-sort-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  min-height: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  white-space: nowrap;
+}
+
+.theme-selector-sort-button:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-surface);
+}
+
+.theme-selector-sort-button:focus {
+  outline: none;
+  border-color: var(--color-focus-ring, #58a6ff);
+  box-shadow: 0 0 0 3px rgb(88 166 255 / 30%);
+}
+
+.theme-selector-sort-button-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-selector-sort-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.theme-selector-sort-label {
+  color: var(--color-text);
+}
+
+.theme-selector-sort-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
+}
+
+.theme-selector-sort--open .theme-selector-sort-chevron {
+  transform: rotate(180deg);
+}
+
+/* Sort Menu (Dropdown) */
+.theme-selector-sort-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  padding: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  opacity: 0%;
+  visibility: hidden;
+  transform: translateY(-8px);
+  /* Note: visibility is NOT in the transition to allow immediate focus on options */
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.theme-selector-sort-menu[aria-hidden="false"] {
+  opacity: 100%;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Sort Option */
+.theme-selector-sort-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text);
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.theme-selector-sort-option:hover {
+  background-color: rgb(110 118 129 / 15%);
+}
+
+.theme-selector-sort-option:focus {
+  outline: none;
+  background-color: rgb(88 166 255 / 15%);
+}
+
+.theme-selector-sort-option[aria-checked="true"] {
+  color: var(--color-accent-primary, #39d353);
+  font-weight: 500;
+}
+
+.theme-selector-sort-option[aria-checked="true"]::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  background-color: var(--color-accent-primary, #39d353);
+  border-radius: 50%;
+}
+
+/* Mobile: Stack search and sort vertically */
+@include bp.mobile {
+  .theme-selector-search-sort-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .theme-selector-sort {
+    width: 100%;
+  }
+
+  .theme-selector-sort-button {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .theme-selector-sort-menu {
+    left: 0;
+    right: 0;
+    min-width: auto;
+  }
+}
+
+/* Contribute Theme Card
+ * A special card that appears at the end of the theme grid,
+ * inviting users to contribute their own themes.
+ * Styled consistently with theme cards for familiar interaction.
+ */
+.contribute-theme-card {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px dashed var(--color-border);
+  background-color: var(--color-input);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  /* Match theme card transitions */
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+
+.contribute-theme-card:hover {
+  border-color: #58a6ff;
+  background-color: rgb(88 166 255 / 5%);
+  /* Match theme card hover lift */
+  transform: translateY(-2px);
+}
+
+.contribute-theme-card:focus {
+  outline: none;
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgb(88 166 255 / 30%);
+}
+
+/* Plus Icon */
+.contribute-theme-icon {
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  transition: color 0.2s, transform 0.2s;
+  align-self: flex-start;
+}
+
+.contribute-theme-card:hover .contribute-theme-icon {
+  color: #58a6ff;
+  transform: scale(1.05);
+}
+
+/* Content Container */
+.contribute-theme-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+}
+
+/* Title */
+.contribute-theme-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Reduced Motion Support for Contribute Card */
+@media (prefers-reduced-motion: reduce) {
+  .contribute-theme-card,
+  .contribute-theme-icon {
+    transition: none !important;
+  }
+
+  .contribute-theme-card:hover {
+    transform: none;
+  }
+
+  .contribute-theme-card:hover .contribute-theme-icon {
+    transform: none;
+  }
+}

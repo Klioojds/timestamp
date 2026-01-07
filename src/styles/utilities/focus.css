@@ -1,0 +1,112 @@
+/**
+ * Focus Ring Utilities
+ * Provides consistent, accessible focus styles using theme color system.
+ * Focus Visible - Any keyboard operable user interface has a mode 
+ * of operation where the keyboard focus indicator is visible.
+ */
+
+/**
+ * Base focus-visible styles for ALL interactive elements.
+ * Uses --color-focus-ring CSS variable from theme system.
+ */
+*:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * Native inputs, buttons, links
+ */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * Custom interactive elements with role="button"
+ * Ensure these have tabindex="0" and keyboard activation (Enter/Space).
+ */
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="switch"]:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * Elements with overflow:hidden need outline-offset adjustment
+ * to ensure focus ring is fully visible.
+ */
+[data-overflow-hidden]:focus-visible {
+  outline-offset: -2px;
+}
+
+/**
+ * Theme cards and grid cells (custom interactive elements)
+ */
+.theme-card:focus-visible,
+.grid-cell:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * Dropdown triggers and toggle switches
+ */
+.timezone-selector-trigger:focus-visible,
+.color-mode-toggle:focus-visible,
+.theme-switcher-button:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * Modal close buttons and dialog elements
+ */
+[role="dialog"] button:focus-visible,
+.modal-close:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/**
+ * High Contrast Mode / Forced Colors Mode support
+ * Ensures focus indicator remains visible in Windows High Contrast Mode.
+ * Non-text Contrast - Focus indicators meet 3:1 contrast.
+ */
+@media (forced-colors: active) {
+  *:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="option"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  [role="checkbox"]:focus-visible,
+  [role="radio"]:focus-visible,
+  [role="switch"]:focus-visible {
+    outline: 2px solid ButtonText;
+    outline-offset: 2px;
+  }
+}
+
+/**
+ * Ensure focus styles don't introduce motion for users who prefer reduced motion.
+ * Animation from Interactions.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *:focus-visible {
+    transition: none;
+  }
+}

@@ -1,0 +1,40 @@
+/**
+ * Main SCSS Entry Point
+ * Aggregates all CSS/SCSS partials in the correct order.
+ *
+ * NOTE: SCSS files that need breakpoint mixins (bp.mobile, bp.desktop, etc.)
+ * explicitly @use '../base/breakpoints' as bp. This follows modern Sass module
+ * system conventions and avoids deprecated @import syntax.
+ *
+ * IMPORTANT: reduced-motion.css MUST be imported last to ensure
+ * highest specificity for accessibility overrides.
+ *
+ * NOTE: Theme-specific CSS (contribution-graph, celebration, fireworks) is now
+ * imported directly by each theme's index.ts for proper code-splitting.
+ * Themes no longer add CSS to the main bundle.
+ *
+ * NOTE: Uses @use instead of @import per Dart Sass 2.0+ deprecation of @import.
+ * @see https://sass-lang.com/d/import
+ */
+
+/* Base styles */
+@use './base/accessibility.css';
+@use './base/visibility.css';
+
+/* Utility styles */
+@use './utilities/focus.css';
+
+/* Layout styles */
+@use './layouts/app-shell.css';
+@use './layouts/responsive-safe-area';
+
+/* Component styles (SCSS files using bp.* breakpoint mixins) */
+@use './components/chrome';
+@use './components/color-mode-toggle';
+@use './components/mobile-menu';
+@use './components/fullscreen';
+@use './components/pwa-install-prompt.css';
+@use './tooltip.css';
+
+/* Reduced motion - MUST BE LAST for highest specificity */
+@use './motion/reduced-motion.css';

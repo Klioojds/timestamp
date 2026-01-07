@@ -1,0 +1,94 @@
+/**
+ * Responsive Breakpoints System (SCSS)
+ *
+ * SINGLE SOURCE OF TRUTH for all breakpoint values.
+ * This module is automatically injected into every SCSS file via Vite's
+ * `css.preprocessorOptions.scss.additionalData` configuration.
+ *
+ * ## Usage
+ *
+ * The `bp` namespace is globally available in all SCSS files. No import needed.
+ *
+ * ```scss
+ * // Use the provided mixins (recommended):
+ * @include bp.mobile {
+ *   // Mobile styles
+ * }
+ *
+ * // Or use variables directly in media queries:
+ * @media (max-width: bp.$mobile) {
+ *   // Mobile styles
+ * }
+ * ```
+ *
+ * ## Breakpoint Strategy
+ *
+ * The app uses a mobile-first approach with 3 primary breakpoints:
+ *
+ * 1. **Mobile (≤1050px)**: Hamburger menu, single-column layouts
+ * 2. **Tablet (≤768px)**: Compact spacing, stacked elements
+ * 3. **Small Mobile (≤540px)**: Minimal spacing, full-width elements
+ *
+ * ## TypeScript Integration
+ *
+ * For JavaScript/TypeScript, use the BREAKPOINTS export from:
+ * @themes/shared/responsive-layout.ts
+ *
+ * The values MUST stay in sync between this file and the TypeScript module.
+ */
+
+// =============================================================================
+// BREAKPOINT VARIABLES
+// =============================================================================
+
+/// Mobile breakpoint - hamburger menu appears at or below this width
+/// @type Length
+$mobile: 1050px !default;
+
+/// Tablet breakpoint - compact layouts at or below this width
+/// @type Length
+$tablet: 768px !default;
+
+/// Small mobile breakpoint - minimal layouts at or below this width
+/// @type Length
+$small: 540px !default;
+
+/// Desktop breakpoint - above mobile (for min-width queries)
+/// @type Length
+$desktop: 1051px !default;
+
+// =============================================================================
+// BREAKPOINT MIXINS
+// =============================================================================
+
+/// Mobile breakpoint mixin (max-width: 1050px)
+/// @content Styles for mobile viewport
+@mixin mobile {
+  @media (max-width: $mobile) {
+    @content;
+  }
+}
+
+/// Tablet breakpoint mixin (max-width: 768px)
+/// @content Styles for tablet viewport
+@mixin tablet {
+  @media (max-width: $tablet) {
+    @content;
+  }
+}
+
+/// Small mobile breakpoint mixin (max-width: 540px)
+/// @content Styles for small mobile viewport
+@mixin small {
+  @media (max-width: $small) {
+    @content;
+  }
+}
+
+/// Desktop breakpoint mixin (min-width: 1051px)
+/// @content Styles for desktop viewport
+@mixin desktop {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}

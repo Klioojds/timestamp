@@ -1,0 +1,256 @@
+/**
+ * World Map Component Styles
+ * Extracted from inline styles in world-map.ts for better maintainability.
+ */
+@use '../base/_breakpoints' as bp;
+
+.world-map-wrapper {
+  --map-continent: var(--theme-map-continent, var(--color-text-muted, rgb(255 255 255 / 15%)));
+  --map-grid: var(--theme-map-grid, color-mix(in srgb, var(--color-border-muted) 30%, transparent));
+  --map-marker: var(--theme-map-marker, #c9d1d9);
+  --map-marker-selected: var(--theme-map-marker-selected, var(--color-text, #fff));
+  --map-marker-user: var(--theme-map-marker-user, var(--color-accent-secondary, #58a6ff));
+  --map-marker-celebrating: var(--theme-map-marker-celebrating, var(--color-accent-primary));
+  --map-label: var(--theme-map-label, #c9d1d9);
+  --map-night: var(--theme-map-night, color-mix(in srgb, var(--color-background) 10%, rgb(0 0 30 / 50%)));
+  --map-terminator: var(--theme-map-terminator, rgb(255 200 100 / 30%));
+  
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  width: 320px;
+  z-index: 90;
+  pointer-events: none;
+  margin: 0;
+}
+
+/* Mobile adjustments */
+@include bp.mobile {
+  .world-map-wrapper {
+    width: min(280px, calc(100vw - 40px));
+    /* Hidden on mobile - will be shown in hamburger menu */
+    display: none;
+  }
+
+  /* Override: Show when inside mobile menu overlay */
+  .mobile-menu-overlay .world-map-wrapper {
+    display: block;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+.world-map-container {
+  position: relative;
+  width: 100%;
+  background: var(--color-surface-elevated, rgb(0 0 0 / 30%));
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border-muted, rgb(255 255 255 / 10%));
+}
+
+.world-map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.world-map .map-grid line {
+  stroke: var(--map-grid);
+  stroke-width: 0.5;
+}
+
+.world-map .continents path {
+  fill: var(--map-continent);
+  transition: fill 0.3s ease;
+}
+
+.world-map .night-overlay {
+  fill: var(--map-night);
+  pointer-events: none;
+  transition: d 1s ease-out;
+}
+
+.world-map .terminator-line {
+  stroke: var(--map-terminator);
+  stroke-width: 2;
+  fill: none;
+  pointer-events: none;
+}
+
+.city-markers {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+}
+
+.city-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease-out;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 1;
+  /* NOTE: Touch targets are smaller than WCAG 2.5.5 recommendation (48px) due to
+     map space constraints. This is an accepted trade-off for this supplementary
+     navigation feature. Primary timezone selection is via dropdown selector. */
+}
+
+.city-marker:hover,
+.city-marker:focus-visible {
+  transform: translate(-50%, -50%) scale(1.3);
+  z-index: 10;
+}
+
+.city-marker:focus-visible {
+  outline: none;
+}
+
+.city-marker:focus-visible .marker-dot {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.marker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--map-marker);
+  /* Drop shadow for visibility against any background */
+  box-shadow: 
+    0 0 0 1.5px rgb(0 0 0 / 50%),
+    0 1px 3px rgb(0 0 0 / 40%);
+  transition: all 0.3s ease-out;
+}
+
+.marker-glow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0%;
+  pointer-events: none;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.marker-label {
+  position: absolute;
+  top: 12px;
+  font-size: 10px;
+  color: var(--map-label);
+  white-space: nowrap;
+  opacity: 0%;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.city-marker:hover .marker-label,
+.city-marker:focus-visible .marker-label,
+.city-marker[data-selected="true"] .marker-label {
+  opacity: 100%;
+}
+
+/* Base marker states - order matters for specificity */
+.city-marker[data-selected="true"] .marker-dot {
+  background: var(--map-marker-selected);
+  box-shadow: 0 0 8px rgb(255 255 255 / 50%);
+}
+
+.city-marker[data-user="true"] .marker-dot {
+  background: var(--map-marker-user);
+}
+
+.city-marker[data-night="true"] .marker-dot {
+  box-shadow: 0 0 6px rgb(255 255 255 / 30%);
+}
+
+/* Celebrating state - highest priority, must come last to override all other states */
+.city-marker[data-celebrating="true"] .marker-dot {
+  background: var(--map-marker-celebrating);
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--map-marker-celebrating) 60%, transparent);
+}
+
+.city-marker[data-celebrating="true"] .marker-glow {
+  opacity: 100%;
+  background: color-mix(in srgb, var(--map-marker-celebrating) 30%, transparent);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.city-marker[data-celebrating="true"] .marker-label {
+  color: var(--map-marker-celebrating);
+  opacity: 100%;
+}
+
+/* Celebrated state - uses theme accent color for customization */
+.city-marker.city-celebrated .marker-dot {
+  filter: drop-shadow(0 0 8px var(--color-accent-primary, #39d353));
+}
+
+.city-marker.city-celebrated .marker-glow {
+  background: color-mix(in srgb, var(--color-accent-primary, #39d353) 30%, transparent);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 30%; }
+  50% { transform: translateX(-50%) scale(2.5); opacity: 0%; }
+}
+
+/* Live region for screen reader announcements */
+.celebration-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-glow {
+    animation: none !important;
+  }
+  .city-marker {
+    transition: none !important;
+  }
+  .world-map .night-overlay {
+    transition: none !important;
+  }
+  .world-map .continents path {
+    transition: none !important;
+  }
+  
+  /* Static glow for celebrated markers without animation */
+  .city-marker.city-celebrated .marker-glow {
+    opacity: 40%;
+    transform: translateX(-50%) scale(1.5);
+  }
+}
+
+/* Light mode overrides for better contrast */
+[data-color-mode="light"] .world-map-wrapper {
+  /* Darker marker color for visibility on light backgrounds */
+  --map-marker: var(--theme-map-marker, #57606a);
+  --map-marker-selected: var(--theme-map-marker-selected, #1f2328);
+  --map-label: var(--theme-map-label, #57606a);
+  /* Darker continent fill for light mode */
+  --map-continent: var(--theme-map-continent, rgb(0 0 0 / 15%));
+  /* Adjusted night overlay for light mode */
+  --map-night: var(--theme-map-night, rgb(30 41 59 / 25%));
+}

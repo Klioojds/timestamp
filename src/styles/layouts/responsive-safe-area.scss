@@ -1,0 +1,85 @@
+/**
+ * Responsive Safe Area Layout
+ *
+ * Provides CSS custom properties and utility classes for themes
+ * to ensure content fits within the visible viewport area,
+ * accounting for fixed UI chrome (buttons, world map, etc.).
+ *
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@use '../base/_breakpoints' as bp;
+
+:root {
+  /* Default safe area values (updated by JS on resize) */
+  --safe-area-top: 60px;
+  --safe-area-right: 20px;
+  --safe-area-bottom: 20px;
+  --safe-area-left: 20px;
+  --safe-area-width: calc(100vw - var(--safe-area-left) - var(--safe-area-right));
+  --safe-area-height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom));
+
+  /* Responsive font scale - themes can use these */
+  --font-scale-mobile: 0.7;
+  --font-scale-tablet: 0.85;
+  --font-scale-desktop: 1;
+  --font-scale: var(--font-scale-desktop);
+
+  /* Breakpoint indicator (updated by JS) */
+  --viewport-breakpoint: desktop;
+  --is-mobile: 0;
+
+  /* Breakpoint reference values (read-only documentation, cannot be used in media queries) */
+  --breakpoint-mobile: #{bp.$mobile};
+  --breakpoint-tablet: #{bp.$tablet};
+  --breakpoint-small: #{bp.$small};
+}
+
+/* Mobile breakpoint: <= 1050px (hamburger menu) */
+@include bp.mobile {
+  :root {
+    --safe-area-top: 70px; /* Larger for touch targets */
+    --safe-area-bottom: 20px; /* Minimal (chrome in hamburger) */
+    --font-scale: var(--font-scale-mobile);
+  }
+}
+
+/* Desktop breakpoint: > 1050px */
+@include bp.desktop {
+  :root {
+    --safe-area-bottom: 220px; /* World map + timezone selector */
+    --font-scale: var(--font-scale-desktop);
+  }
+}
+
+/**
+ * Utility class for theme containers using safe area.
+ * Themes can use this class or reference the CSS custom properties directly.
+ */
+.theme-safe-area {
+  position: absolute;
+  top: var(--safe-area-top);
+  right: var(--safe-area-right);
+  bottom: var(--safe-area-bottom);
+  left: var(--safe-area-left);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/**
+ * Override for timer mode (no world map/timezone selector).
+ * Timer mode has minimal bottom space regardless of viewport size.
+ */
+.timer-mode,
+:root:has([data-mode="timer"]) {
+  --safe-area-bottom: 20px;
+}
+
+/**
+ * Responsive font sizing utility.
+ * Themes can use this pattern for responsive typography.
+ *
+ * Example:
+ * font-size: calc(4rem * var(--font-scale));
+ */

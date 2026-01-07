@@ -1,0 +1,330 @@
+/**
+ * Countdown UI Components
+ * Shared styles for buttons and controls in the countdown view.
+ * 
+ * These styles are extracted from inline JS to benefit from:
+ * - CSS parsing/caching (vs re-parsing inline styles)
+ * - Native :hover/:focus handling (vs JS event listeners)
+ * - Smaller JS bundle size
+ * - Easier maintenance and theming
+ */
+
+/* ==========================================================================
+   Base Button Styles
+   Used by: back-button, share-button, github-button, favorite-button, theme-switcher
+   ========================================================================== */
+
+.countdown-button {
+  padding: 10px 16px;
+  min-height: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  background-color: var(--color-surface-elevated, rgb(22 27 34 / 90%));
+  color: var(--color-text, #c9d1d9);
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.countdown-button:hover {
+  background-color: var(--color-surface, rgb(48 54 61 / 90%));
+  border-color: var(--color-text-muted, #8b949e);
+}
+
+.countdown-button:focus,
+.countdown-button:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Icon-Only Button Variant
+   Used by: github-button
+   ========================================================================== */
+
+.countdown-button--icon-only {
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+}
+
+/* ==========================================================================
+   Back Button
+   Fixed position in top-left corner
+   ========================================================================== */
+
+.back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+/* ==========================================================================
+   Offline Indicator
+   Shows connection status with color states
+   ========================================================================== */
+
+.offline-indicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--color-surface-elevated, rgb(22 27 34 / 90%));
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.offline-indicator--offline {
+  display: flex;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.offline-indicator--online {
+  display: flex;
+  color: var(--color-success, #3fb950);
+  border: 1px solid var(--color-success, #3fb950);
+}
+
+.offline-indicator__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================================================
+   Share Button Feedback States (CSS-driven via data-feedback attribute)
+   ========================================================================== */
+
+.share-button[data-feedback="success"],
+.share-menu-button[data-feedback="success"] {
+  background-color: rgb(35 134 54 / 90%) !important;
+}
+
+.share-button[data-feedback="error"],
+.share-menu-button[data-feedback="error"] {
+  background-color: rgb(248 81 73 / 90%) !important;
+}
+
+.share-menu-item[data-feedback="success"] {
+  background-color: rgb(35 134 54 / 90%) !important;
+  color: white !important;
+}
+
+.share-menu-item[data-feedback="error"] {
+  background-color: rgb(248 81 73 / 90%) !important;
+  color: white !important;
+}
+
+/* Legacy class-based feedback states (kept for backwards compatibility during migration) */
+.share-button--success {
+  background-color: rgb(35 134 54 / 90%) !important;
+}
+
+.share-button--error {
+  background-color: rgb(248 81 73 / 90%) !important;
+}
+
+.share-menu-item--success {
+  background-color: rgb(35 134 54 / 90%) !important;
+  color: white !important;
+}
+
+.share-menu-item--error {
+  background-color: rgb(248 81 73 / 90%) !important;
+  color: white !important;
+}
+
+/* ==========================================================================
+   Reduced Motion Support
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-button {
+    transition: none;
+  }
+  
+  .offline-indicator {
+    transition: none;
+  }
+  
+  .share-menu-dropdown {
+    transition: none;
+  }
+  
+  .share-menu-chevron {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Share Menu Component
+   Dropdown menu for wall-clock mode timezone sharing options
+   ========================================================================== */
+
+.share-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   Timer Controls Component
+   Play/pause toggle and reset buttons for timer mode
+   ========================================================================== */
+
+.timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-control-button {
+  /* Ensure minimum 44x44px touch target for accessibility (WCAG 2.5.5) */
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.timer-control-button:focus-visible {
+  /* High-contrast focus indicator for WCAG compliance */
+  outline: 2px solid var(--color-focus-ring, #58a6ff);
+  outline-offset: 2px;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer-control-button {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Share Menu Trigger and Dropdown
+   ========================================================================== */
+
+/* Trigger button with dropdown indicator */
+.share-menu-trigger {
+  padding-right: 28px; /* Extra space for chevron */
+}
+
+.share-menu-chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.share-menu-trigger[aria-expanded="true"] .share-menu-chevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Dropdown menu */
+.share-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  background-color: var(--color-surface-elevated, rgb(22 27 34 / 98%));
+  border: 1px solid var(--color-border, #30363d);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(1 4 9 / 50%);
+  z-index: 1001;
+  opacity: 0%;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+
+.share-menu-dropdown--open {
+  opacity: 100%;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Menu items */
+.share-menu-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--color-text, #c9d1d9);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  /* Minimum touch target (44px) */
+  min-height: 44px;
+}
+
+/* Hide link icon in desktop dropdown - only visible in mobile menu */
+.share-menu-item .share-link-icon {
+  display: none;
+}
+
+.share-menu-item:hover {
+  background-color: var(--color-surface, rgb(48 54 61 / 90%));
+}
+
+.share-menu-item:focus,
+.share-menu-item:focus-visible {
+  outline: none;
+  background-color: rgb(56 139 253 / 15%);
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring, #58a6ff);
+}
+
+.share-menu-item:first-child {
+  border-radius: 5px 5px 0 0;
+}
+
+.share-menu-item:last-child {
+  border-radius: 0 0 5px 5px;
+}
+
+/* Divider between menu items */
+.share-menu-item + .share-menu-item {
+  border-top: 1px solid var(--color-border, #30363d);
+}
+
+/* Success/error feedback states for menu items (desktop dropdown) */
+.share-menu-item--success {
+  background-color: rgb(46 160 67 / 20%) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-success, #3fb950);
+}
+
+.share-menu-item--error {
+  background-color: rgb(248 81 73 / 20%) !important;
+  border-color: var(--color-error, #da3633) !important;
+  color: var(--color-error, #f85149);
+}

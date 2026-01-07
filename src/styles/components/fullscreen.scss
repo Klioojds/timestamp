@@ -1,0 +1,78 @@
+/**
+ * Fullscreen Mode Styles
+ *
+ * Handles chrome hiding and exit button appearance when in fullscreen mode.
+ * Exit button uses opacity transitions for smooth show/hide.
+ */
+@use '../base/_breakpoints' as bp;
+
+/* Hide fullscreen button on mobile/tablet (desktop only feature)
+ * Uses max-width: 1050px to match mobile breakpoint consistently.
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.mobile {
+  .fullscreen-button {
+    display: none !important;
+  }
+}
+
+/* Hide chrome elements in fullscreen mode */
+body.fullscreen-mode #mobile-menu-toggle,
+body.fullscreen-mode .back-button,
+body.fullscreen-mode .timezone-selector-wrapper,
+body.fullscreen-mode .world-map-container {
+  display: none !important;
+}
+
+/* Hide button container when data-chrome-hidden is set */
+.countdown-button-container[data-chrome-hidden="true"] {
+  display: none !important;
+}
+
+/* Exit button positioning and transitions */
+#exit-fullscreen-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10001; /* Above other chrome elements */
+  opacity: 0%;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform: translateY(-10px);
+  visibility: hidden;
+}
+
+#exit-fullscreen-button.show-exit-button {
+  opacity: 100% !important;
+  pointer-events: auto !important;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+#exit-fullscreen-button[data-visible="false"] {
+  visibility: hidden;
+}
+
+#exit-fullscreen-button[data-visible="true"] {
+  visibility: visible;
+}
+
+/* Ensure countdown takes full viewport in fullscreen */
+body.fullscreen-mode {
+  overflow: hidden;
+}
+
+body.fullscreen-mode #app-container {
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Ensure theme content fills viewport in fullscreen */
+body.fullscreen-mode #theme-container {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+}

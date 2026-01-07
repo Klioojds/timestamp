@@ -1,0 +1,43 @@
+/**
+ * Reduced Motion Styles - MUST BE IMPORTED LAST
+ * Accessibility overrides for users who prefer reduced motion.
+ * This file must be imported last to ensure highest specificity.
+ */
+
+/* Respect reduced motion - no transitions for ambient squares */
+@media (prefers-reduced-motion: reduce) {
+  .square.ambient-square {
+    transition: none;
+  }
+}
+
+/* Respect reduced motion - no fade animation for digits */
+@media (prefers-reduced-motion: reduce) {
+  .contribution-grid.digits-initial-fade .pulse-digit {
+    animation: none;
+  }
+}
+
+/* Reduced motion support for accessibility - main override */
+@media (prefers-reduced-motion: reduce) {
+  .square,
+  .pulse-digit,
+  .cascade-fill,
+  .celebration-glow,
+  .star {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .pulse-digit {
+    /* Static highlight instead of pulsing - no animation, no glow */
+    background-color: #39d353;
+    filter: none;
+  }
+  
+  .cascade-white,
+  .celebration-green,
+  .celebration-empty {
+    transition: none !important;
+  }
+}

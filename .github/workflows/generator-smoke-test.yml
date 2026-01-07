@@ -1,0 +1,113 @@
+# Generator Smoke Test Workflow
+#
+# PURPOSE: Validates that the create-theme generator produces working themes
+#
+# When generator-related files are modified in a PR, this workflow:
+# 1. Creates a temporary test theme using the generator
+# 2. Runs TypeScript type checking on the generated code
+# 3. Runs unit tests for the generated theme
+# 4. Cleans up the temporary theme
+#
+# This catches generator bugs before they break theme creation:
+# - Incorrect API signatures in generated code
+# - Missing imports or exports
+# - Type mismatches with core interfaces
+# - Test failures in generated test files
+name: Generator Smoke Test
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/create-theme/**'
+      - 'scripts/theme-cli.ts'
+      - 'src/core/types/**'
+      - 'src/themes/shared/**'
+      - 'src/themes/registry/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test-generator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create temporary test theme
+        id: create
+        run: |
+          echo "Creating temporary test theme..."
+          npm run theme create smoke-test-theme ci-bot
+          echo "theme_created=true" >> $GITHUB_OUTPUT
+
+      - name: Verify generated files exist
+        run: |
+          echo "Verifying generated theme structure..."
+          test -f src/themes/smoke-test-theme/index.ts
+          test -f src/themes/smoke-test-theme/config/index.ts
+          test -f src/themes/smoke-test-theme/config/index.test.ts
+          test -f src/themes/smoke-test-theme/renderers/time-page-renderer.ts
+          test -f src/themes/smoke-test-theme/renderers/time-page-renderer.test.ts
+          test -f src/themes/smoke-test-theme/renderers/landing-page-renderer.ts
+          test -f src/themes/smoke-test-theme/renderers/landing-page-renderer.test.ts
+          echo "✅ All expected files generated"
+
+      - name: TypeScript type check
+        run: |
+          echo "Running TypeScript type check on generated theme..."
+          npx tsc --noEmit
+
+      - name: Run generated theme tests
+        run: |
+          echo "Running unit tests for generated theme..."
+          npm run test -- smoke-test-theme --reporter=dot
+
+      - name: Cleanup temporary theme
+        if: always() && steps.create.outputs.theme_created == 'true'
+        run: |
+          echo "Cleaning up temporary test theme..."
+          rm -rf src/themes/smoke-test-theme
+          # Restore registry (revert the auto-registration)
+          git checkout src/themes/registry/registry-core.ts
+          echo "✅ Cleanup complete"
+
+      # Generate summary
+      - name: Generate summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🔧 Generator Smoke Test Results
+          
+          This workflow validates that the theme generator produces working code.
+          
+          | Step | Status |
+          |------|--------|
+          | Theme Creation | ${{ steps.create.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | TypeScript Check | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Unit Tests | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |
+          
+          ### What This Tests
+          
+          - Generator produces valid TypeScript that compiles
+          - Generated files implement required interfaces correctly
+          - Generated tests pass out of the box
+          - Registry auto-registration works
+          
+          ---
+          _Triggered by changes to: `scripts/create-theme/**`, `src/core/types/**`, `src/themes/shared/**`_
+          EOF

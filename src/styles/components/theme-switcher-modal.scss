@@ -1,0 +1,173 @@
+/**
+ * Theme Switcher Modal Styles
+ * Provides modal dialog styling with overlay, animations, and responsive behavior.
+ */
+@use '../base/_breakpoints' as bp;
+
+/* Modal Overlay (Backdrop) */
+.theme-modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* Must be higher than mobile menu overlay (z-index: 10002) */
+  z-index: 10010;
+  background: color-mix(in srgb, var(--color-background) 80%, transparent);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* Start invisible to prevent flash before animation starts */
+  opacity: 0%;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0%;
+  }
+  to {
+    opacity: 100%;
+  }
+}
+
+/* Modal Dialog */
+.theme-modal {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 32px color-mix(in srgb, var(--color-background) 80%, transparent);
+  display: flex;
+  flex-direction: column;
+  /* Start in final position to prevent flash during layout */
+  opacity: 0%;
+  transform: translateY(0);
+  animation: modalSlideUp 0.3s ease-out forwards;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0%;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 100%;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.theme-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.theme-modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.theme-modal-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-modal-close:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.theme-modal-close:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 30%, transparent);
+}
+
+.theme-modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Modal Body */
+.theme-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Scrollbar Styling */
+.theme-modal-body::-webkit-scrollbar {
+  width: 12px;
+}
+
+.theme-modal-body::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+.theme-modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 6px;
+  border: 3px solid var(--color-background);
+}
+
+.theme-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border);
+}
+
+/* Responsive Adjustments
+ * Uses tablet breakpoint (768px) for compact modal layout on smaller screens.
+ * @see src/styles/base/_breakpoints.scss for breakpoint documentation.
+ */
+@include bp.tablet {
+  .theme-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .theme-modal-header,
+  .theme-modal-body {
+    padding: 16px;
+  }
+
+  .theme-modal-title {
+    font-size: 20px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .theme-modal-overlay {
+    animation: none !important;
+    /* Show immediately without animation */
+    opacity: 100%;
+  }
+
+  .theme-modal {
+    animation: none !important;
+    /* Show immediately without animation */
+    opacity: 100%;
+    transform: translateY(0);
+  }
+
+  .theme-modal-close {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/index.ts!",
+    "scripts/*.ts"
+  ],
+  "project": [
+    "src/**/*.ts!",
+    "scripts/**/*.ts",
+    "e2e/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts"
+  ],
+  "ignore": [
+    "src/vite-env.d.ts",
+    "vitest.setup.ts"
+  ],
+  "ignoreFiles": [
+    "src/app/orchestrator/index.ts",
+    "src/components/mobile-menu/mobile-menu.ts",
+    "src/components/perf-overlay/perf-overlay.ts",
+    "src/components/theme-selector/index.ts",
+    "src/components/timezone-selector/timezone-selector.ts",
+    "src/components/world-map/world-map.ts",
+    "src/themes/*/index.ts",
+    "src/test-utils/**",
+    "src/pwa/test-utils.ts"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "ignoreDependencies": [
+    "@typescript-eslint/parser",
+    "playwright"
+  ],
+  "ignoreIssues": {
+    "src/core/utils/perf/**": ["exports"],
+    "src/core/config/mode-config.ts": ["exports"],
+    "src/core/utils/solar/**": ["exports"],
+    "src/pwa/index.ts": ["exports"],
+    "src/themes/contribution-graph/config.ts": ["exports"],
+    "src/themes/contribution-graph/utils/rendering/digit-patterns.data.ts": ["exports"],
+    "src/themes/contribution-graph/utils/rendering/digit-patterns/**": ["exports"],
+    "src/themes/contribution-graph/utils/celebration/precompute.ts": ["exports"],
+    "src/themes/contribution-graph/utils/state/**": ["exports"],
+    "src/themes/contribution-graph/utils/rendering/styling.ts": ["exports"],
+    "src/themes/shared/**": ["exports"]
+  },
+  "playwright": {
+    "entry": ["e2e/**/*.spec.ts", "playwright.config.ts"]
+  },
+  "vitest": {
+    "entry": ["src/**/*.test.ts", "vitest.config.ts", "vitest.setup.ts"]
+  }
+}

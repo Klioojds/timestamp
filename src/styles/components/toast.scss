@@ -1,0 +1,243 @@
+/**
+ * Toast Component Styles
+ *
+ * Unified toast/notification styling with:
+ * - Responsive positioning (top desktop, bottom mobile)
+ * - Stacking support via CSS custom property
+ * - Multiple variants (info, success, warning, error, permission)
+ * - Accessible focus states and reduced motion support
+ */
+@use '../base/_breakpoints' as bp;
+
+/* ==========================================================================
+   Stack Container - Holds all toasts
+   ========================================================================== */
+
+.toast-stack {
+  position: fixed;
+  z-index: 9999;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  max-width: calc(100% - 2rem);
+  width: 400px;
+
+  /* Desktop: position below header chrome using safe area */
+  top: calc(var(--safe-area-top, 60px) + 1rem);
+  bottom: auto;
+
+  /* Mobile: bottom positioning */
+  @include bp.mobile {
+    top: auto;
+    /* Position above any bottom chrome using safe area */
+    bottom: calc(var(--safe-area-bottom, 20px) + 1rem);
+    /* Reverse order so newest appears closest to thumb */
+    flex-direction: column-reverse;
+  }
+}
+
+/* ==========================================================================
+   Toast Base Styles
+   ========================================================================== */
+
+.toast {
+  background-color: var(--color-surface, #161b22);
+  color: var(--color-text, #fff);
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border, #30363d);
+  pointer-events: auto;
+  opacity: 0%;
+  transform: translateY(-1rem);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+
+  /* Mobile: slide up from bottom */
+  @include bp.mobile {
+    transform: translateY(1rem);
+  }
+}
+
+.toast--visible {
+  opacity: 100%;
+  transform: translateY(0);
+
+  /* Mobile: slide up from bottom */
+  @include bp.mobile {
+    transform: translateY(0);
+  }
+}
+
+.toast--no-animation {
+  transition: none;
+}
+
+/* ==========================================================================
+   Toast Content
+   ========================================================================== */
+
+.toast__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.toast__icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.toast__message {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Toast Actions
+   ========================================================================== */
+
+.toast__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.toast__button {
+  border: none;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  min-height: 36px;
+  transition:
+    background-color 0.2s ease,
+    filter 0.2s ease;
+}
+
+.toast__button--primary {
+  background-color: var(--color-accent, #238636);
+  color: var(--color-text-on-success, #fff);
+}
+
+.toast__button--primary:hover {
+  filter: brightness(1.1);
+}
+
+.toast__button--secondary {
+  background-color: transparent;
+  color: var(--color-text-muted, #8b949e);
+  border: 1px solid var(--color-border, #30363d);
+}
+
+.toast__button--secondary:hover {
+  color: var(--color-text, #fff);
+  border-color: var(--color-text-muted, #8b949e);
+}
+
+.toast__button:focus-visible {
+  outline: 3px solid var(--color-focus, #58a6ff);
+  outline-offset: 2px;
+}
+
+.toast__dismiss {
+  background: transparent;
+  color: var(--color-text-muted, #8b949e);
+  border: none;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.toast__dismiss:hover {
+  color: var(--color-text, #fff);
+}
+
+.toast__dismiss:focus-visible {
+  outline: 3px solid var(--color-focus, #58a6ff);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Toast Variants
+   ========================================================================== */
+
+/* Info variant */
+.toast--info {
+  border-color: var(--color-accent-secondary, #58a6ff);
+}
+
+.toast--info .toast__icon {
+  color: var(--color-accent-secondary, #58a6ff);
+}
+
+/* Success variant */
+.toast--success {
+  border-color: var(--color-success, #238636);
+}
+
+.toast--success .toast__icon {
+  color: var(--color-success, #238636);
+}
+
+/* Warning variant */
+.toast--warning {
+  border-color: var(--color-warning, #d29922);
+}
+
+.toast--warning .toast__icon {
+  color: var(--color-warning, #d29922);
+}
+
+/* Error variant */
+.toast--error {
+  border-color: var(--color-error, #f85149);
+  background-color: color-mix(in srgb, var(--color-error, #f85149) 10%, var(--color-surface, #161b22));
+}
+
+.toast--error .toast__icon {
+  color: var(--color-error, #f85149);
+}
+
+/* Permission variant */
+.toast--permission {
+  border-color: var(--color-accent, #238636);
+}
+
+.toast--permission .toast__icon {
+  color: var(--color-accent, #238636);
+}
+
+/* ==========================================================================
+   Reduced Motion Support
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+
+  .toast__button,
+  .toast__dismiss {
+    transition: none;
+  }
+}

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Timestamp - Your Stamp on Time</title>
+    <meta name="title" content="Timestamp - Your Stamp on Time" />
+    <meta name="description" content="Create custom countdowns, timers, and world clocks for any occasion. Multiple visual themes with instant URL sharing. Features stunning GitHub contribution graph and fireworks themes." />
+    <meta name="author" content="Chris Reddington" />
+    <meta name="theme-color" content="#0d1117" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="generator" content="Vite" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://chrisreddington.com/timestamp/" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    
+    <!-- Preconnect to GitHub for avatar images in theme cards -->
+    <link rel="preconnect" href="https://github.com" />
+    <link rel="dns-prefetch" href="https://github.com" />
+    
+    <!-- Preload LCP image (first theme preview) for faster rendering -->
+    <!-- PERF: fetchpriority="high" tells browser this is the LCP element -->
+    <!-- NOTE: Vite hashes assets, so this preload is injected via plugin at build time -->
+    
+    <!-- Web App Manifest - injected by vite-plugin-pwa -->
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chrisreddington.com/timestamp/" />
+    <meta property="og:title" content="Timestamp - Your Stamp on Time" />
+    <meta property="og:description" content="Create custom countdowns, timers, and world clocks for any occasion. Multiple visual themes with instant URL sharing." />
+    <meta property="og:image" content="https://chrisreddington.com/timestamp/og-image.png" />
+    <meta property="og:image:alt" content="Timestamp app showing countdown with GitHub contribution graph theme" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Timestamp" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://chrisreddington.com/timestamp/" />
+    <meta name="twitter:title" content="Timestamp - Your Stamp on Time" />
+    <meta name="twitter:description" content="Create custom countdowns, timers, and world clocks for any occasion. Multiple visual themes with instant URL sharing." />
+    <meta name="twitter:image" content="https://chrisreddington.com/timestamp/og-image.png" />
+    <meta name="twitter:image:alt" content="Timestamp app showing countdown with GitHub contribution graph theme" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Timestamp",
+      "url": "https://chrisreddington.com/timestamp/",
+      "description": "Create custom countdowns, timers, and world clocks for any occasion. Multiple visual themes with instant URL sharing. Features stunning GitHub contribution graph and fireworks themes.",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Chris Reddington",
+        "url": "https://github.com/chrisreddington"
+      },
+      "featureList": [
+        "Date-based countdown mode",
+        "Timer countdown mode",
+        "Multiple visual themes",
+        "Instant URL sharing",
+        "GitHub contribution graph theme",
+        "Fireworks theme",
+        "Timezone support",
+        "Custom completion messages"
+      ],
+      "screenshot": "https://chrisreddington.com/timestamp/og-image.png"
+    }
+    </script>
+    <style>
+      /* 
+       * Critical CSS for initial load
+       * 
+       * COLOR MODE PRIORITY:
+       * 1. [data-color-mode] attribute (set by blocking script from localStorage)
+       * 2. @media (prefers-color-scheme) (system preference fallback)
+       * 
+       * This ensures NO flash regardless of system vs saved preference mismatch.
+       */
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-color: #0d1117;
+      }
+      @media (prefers-color-scheme: light) {
+        body { background-color: #fff; }
+      }
+      [data-color-mode="dark"] body,
+      [data-color-mode="dark"] { background-color: #0d1117; }
+      [data-color-mode="light"] body,
+      [data-color-mode="light"] { background-color: #fff; }
+      
+      #app {
+        min-height: 100vh;
+      }
+      /* Generic loading spinner */
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        z-index: 9999;
+        background-color: #0d1117;
+      }
+      @media (prefers-color-scheme: light) {
+        .loading-container { background-color: #fff; }
+      }
+      [data-color-mode="dark"] .loading-container { background-color: #0d1117; }
+      [data-color-mode="light"] .loading-container { background-color: #fff; }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #21262d;
+        border-top-color: #58a6ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @media (prefers-color-scheme: light) {
+        .loading-spinner {
+          border-color: #d0d7de;
+          border-top-color: #0969da;
+        }
+      }
+      [data-color-mode="dark"] .loading-spinner {
+        border-color: #21262d;
+        border-top-color: #58a6ff;
+      }
+      [data-color-mode="light"] .loading-spinner {
+        border-color: #d0d7de;
+        border-top-color: #0969da;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .loading-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 0.875rem;
+        color: #8b949e;
+      }
+      @media (prefers-color-scheme: light) {
+        .loading-text { color: #656d76; }
+      }
+      [data-color-mode="dark"] .loading-text { color: #8b949e; }
+      [data-color-mode="light"] .loading-text { color: #656d76; }
+      
+      .hidden {
+        display: none !important;
+      }
+      /* Accessibility: respect reduced motion preference */
+      @media (prefers-reduced-motion: reduce) {
+        .loading-spinner { 
+          animation: none;
+          border-top-color: #58a6ff;
+          border-right-color: #58a6ff;
+        }
+      }
+    </style>
+    <!-- 
+      BLOCKING COLOR MODE SCRIPT
+      Must run BEFORE CSS to prevent flash when system preference ≠ saved preference.
+      This pattern is used by GitHub, Next.js, and other major sites.
+    -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('countdown:color-mode');
+          if (saved === 'dark' || saved === 'light') {
+            document.documentElement.setAttribute('data-color-mode', saved);
+          }
+        } catch (e) {
+          // localStorage may be blocked in private browsing
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; background-color: #0d1117; color: #8b949e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; text-align: center;">
+        <h1 style="color: #58a6ff; font-size: 1.5rem; margin: 0;">Timestamp</h1>
+        <p style="font-size: 1rem; margin: 0;">JavaScript is required to use this application.</p>
+        <p style="font-size: 0.875rem; margin: 0;">Please enable JavaScript in your browser settings to continue.</p>
+      </div>
+    </noscript>
+    <div id="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <span class="loading-text">Loading...</span>
+    </div>
+    <div id="app"></div>
+    <div id="a11y-status" role="status" aria-live="polite" class="sr-only"></div>
+    
+    <!-- Component Templates (cloned by JS, never rendered directly) -->
+    <!-- High Priority: Trivial static structures -->
+    <template id="completion-message-template">
+      <section class="landing-form-section landing-message-section" data-testid="landing-message-section">
+        <div class="landing-section-title" id="landing-message-label">Completion Message</div>
+        <textarea 
+          id="landing-completion-message"
+          class="landing-message-input"
+          data-testid="landing-completion-message"
+          aria-labelledby="landing-message-label"
+          maxlength="200"
+          placeholder="Leave blank for default message"
+        ></textarea>
+      </section>
+    </template>
+    
+    <template id="search-section-template">
+      <div class="theme-selector-search-section">
+        <input
+          type="search"
+          id="theme-search"
+          class="theme-selector-search-input"
+          placeholder="Search by name or author..."
+          aria-label="Search themes"
+          aria-describedby="search-hint"
+          data-testid="theme-search-input"
+        />
+        <span id="search-hint" class="sr-only">
+          Type to filter themes. Use arrow keys to navigate results.
+        </span>
+      </div>
+    </template>
+    
+    <template id="themes-container-template">
+      <div
+        class="theme-selector-grid"
+        data-testid="theme-selector-grid"
+        role="grid"
+        aria-label="Theme selector"
+        aria-rowcount="0"
+      ></div>
+    </template>
+    
+    <template id="sentinel-template">
+      <div class="theme-selector-sentinel" data-testid="theme-selector-sentinel"></div>
+    </template>
+    
+    <template id="results-count-template">
+      <div
+        class="theme-selector-results-count"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
+    </template>
+    
+    <!-- Medium Priority: Form Sections -->
+    <template id="date-section-template">
+      <section class="landing-form-section" data-testid="landing-date-section">
+        <div class="landing-section-title" id="landing-date-label">
+          Target Date &amp; Time
+        </div>
+        <input 
+          type="datetime-local" 
+          id="landing-date-picker"
+          class="landing-date-input"
+          data-testid="landing-date-picker"
+          aria-labelledby="landing-date-label"
+          aria-describedby="landing-date-error"
+          required
+        />
+        <span 
+          id="landing-date-error" 
+          class="landing-field-error" 
+          role="alert"
+          hidden
+        ></span>
+      </section>
+    </template>
+    
+    <template id="timer-section-template">
+      <section class="landing-form-section" data-testid="landing-timer-section">
+        <div class="landing-section-title">Duration</div>
+        <div class="landing-duration-group">
+          <div class="landing-duration-field">
+            <input 
+              type="number" 
+              class="landing-duration-input"
+              min="0"
+              step="1"
+              placeholder="00"
+              data-testid="landing-duration-hours"
+              aria-label="Hours"
+              aria-describedby="landing-duration-error"
+            />
+            <span class="landing-duration-label">Hours</span>
+          </div>
+          <div class="landing-duration-field">
+            <input 
+              type="number" 
+              class="landing-duration-input"
+              min="0"
+              step="1"
+              placeholder="00"
+              data-testid="landing-duration-minutes"
+              aria-label="Minutes"
+              aria-describedby="landing-duration-error"
+            />
+            <span class="landing-duration-label">Minutes</span>
+          </div>
+          <div class="landing-duration-field">
+            <input 
+              type="number" 
+              class="landing-duration-input"
+              min="0"
+              step="1"
+              placeholder="00"
+              data-testid="landing-duration-seconds"
+              aria-label="Seconds"
+              aria-describedby="landing-duration-error"
+            />
+            <span class="landing-duration-label">Seconds</span>
+          </div>
+        </div>
+        <div 
+          id="landing-duration-preview"
+          class="landing-duration-preview"
+          data-testid="landing-duration-preview"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-hidden="true"
+        ></div>
+        <span 
+          id="landing-duration-error" 
+          class="landing-field-error" 
+          role="alert"
+          hidden
+        ></span>
+      </section>
+    </template>
+    
+    <template id="share-menu-template">
+      <div class="share-menu-container" data-testid="share-menu">
+        <button 
+          type="button"
+          tabindex="0"
+          class="countdown-button share-button share-menu-trigger"
+          data-testid="share-button"
+          aria-label="Copy countdown URL to clipboard"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span class="share-menu-button-text">Share</span>
+        </button>
+        <div class="share-menu-dropdown" role="menu" aria-label="Share options">
+          <button type="button" role="menuitem" data-testid="share-selected-timezone" data-original-label="Selected timezone" tabindex="-1" class="share-menu-item">
+            <span class="share-menu-item-label">Selected timezone</span>
+          </button>
+          <button type="button" role="menuitem" data-testid="share-local-timezone" data-original-label="My local timezone" tabindex="-1" class="share-menu-item">
+            <span class="share-menu-item-label">My local timezone</span>
+          </button>
+          <button type="button" role="menuitem" data-testid="share-without-timezone" data-original-label="Their timezone" tabindex="-1" class="share-menu-item">
+            <span class="share-menu-item-label">Their timezone</span>
+          </button>
+        </div>
+      </div>
+    </template>
+    
+    <template id="simple-share-button-template">
+      <button 
+        type="button"
+        tabindex="0"
+        class="countdown-button share-button"
+        data-testid="share-button"
+        aria-label="Copy countdown URL to clipboard"
+      >
+        <span class="share-button-text">Share</span>
+      </button>
+    </template>
+    
+    <!-- Phase 3: Component Shell Templates -->
+    <template id="mobile-menu-button-template">
+      <button 
+        type="button"
+        tabindex="0"
+        class="mobile-menu-button"
+        data-testid="mobile-menu-button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-haspopup="dialog"
+      ></button>
+    </template>
+    
+    <template id="mobile-menu-overlay-template">
+      <div class="mobile-menu-overlay" data-testid="mobile-menu-overlay" role="dialog" aria-modal="true" aria-label="Countdown options">
+        <div class="mobile-menu-header">
+          <h2 class="mobile-menu-title">Countdown Options</h2>
+          <button class="mobile-menu-close" data-testid="mobile-menu-close" aria-label="Close menu" tabindex="0"></button>
+        </div>
+        <div class="mobile-menu-content" data-testid="mobile-menu-content">
+          <section class="mobile-menu-section" data-section="actions" aria-label="Actions"></section>
+          <section class="mobile-menu-section" data-section="colormode" aria-label="Color Mode"></section>
+          <section class="mobile-menu-section" data-section="timezone" aria-label="Timezone"></section>
+          <section class="mobile-menu-section" data-section="worldmap" aria-label="World Map"></section>
+        </div>
+      </div>
+    </template>
+    
+    <template id="color-mode-toggle-template">
+      <div class="color-mode-toggle" data-testid="color-mode-toggle">
+        <div class="color-mode-toggle-group" role="radiogroup" aria-label="Color mode">
+          <button type="button" class="color-mode-toggle-option" data-testid="color-mode-toggle-light" data-mode="light" role="radio" aria-checked="false">
+            <span class="color-mode-toggle-label">Light</span>
+          </button>
+          <button type="button" class="color-mode-toggle-option" data-testid="color-mode-toggle-dark" data-mode="dark" role="radio" aria-checked="false">
+            <span class="color-mode-toggle-label">Dark</span>
+          </button>
+          <button type="button" class="color-mode-toggle-option" data-testid="color-mode-toggle-system" data-mode="system" role="radio" aria-checked="false">
+            <span class="color-mode-toggle-label">System</span>
+          </button>
+        </div>
+      </div>
+    </template>
+    
+    <template id="timezone-selector-template">
+      <div class="timezone-selector">
+        <button type="button" class="timezone-selector-trigger" data-testid="timezone-selector-trigger" aria-haspopup="listbox" aria-expanded="false" tabindex="0">
+          <div class="selector-text">
+            <span class="selector-label">Timezone</span>
+            <span class="selector-value"></span>
+          </div>
+        </button>
+        <div class="timezone-dropdown" role="listbox" hidden>
+          <div class="dropdown-search">
+            <input type="search" class="search-input" placeholder="Search timezones..." aria-label="Search timezones" />
+          </div>
+          <div class="dropdown-list" data-testid="timezone-dropdown-list"></div>
+        </div>
+      </div>
+    </template>
+    
+    <template id="pwa-install-dialog-template">
+      <div class="install-prompt-dialog" role="dialog" aria-modal="true" aria-labelledby="install-prompt-title" aria-describedby="install-prompt-description">
+        <h2 id="install-prompt-title" class="install-prompt-title">Install Timestamp</h2>
+        <p id="install-prompt-description" class="install-prompt-description"></p>
+        <div class="install-prompt-button-container"></div>
+      </div>
+    </template>
+    
+    <!-- Phase 4: Icon Component Templates -->
+    <template id="timer-controls-template">
+      <div class="timer-controls" data-testid="timer-controls">
+        <span aria-live="polite" aria-atomic="true" class="sr-only"></span>
+        <button type="button" class="countdown-button countdown-button--icon-only timer-control-button" data-testid="timer-play-pause" aria-label="Pause timer" aria-pressed="false" tabindex="0"></button>
+        <button type="button" class="countdown-button countdown-button--icon-only timer-control-button" data-testid="timer-reset" aria-label="Reset timer to original duration" tabindex="0"></button>
+      </div>
+    </template>
+    
+    <template id="offline-indicator-template">
+      <div class="offline-indicator" role="status" aria-live="polite" aria-atomic="true" data-testid="offline-indicator">
+        <span class="offline-indicator__icon" aria-hidden="true"></span>
+        <span></span>
+      </div>
+    </template>
+    
+    <!-- PLAN-002: Landing Page -->
+    <template id="mode-selector-template">
+      <fieldset class="landing-mode-fieldset" data-testid="landing-mode-selector">
+        <legend>Mode</legend>
+        <div class="landing-mode-group"></div>
+      </fieldset>
+    </template>
+    
+    <template id="landing-footer-template">
+      <footer class="landing-footer" data-testid="landing-footer">
+        <div class="landing-footer-content">
+          <div class="landing-footer-attribution">
+            Made with ❤️ by 
+            <a href="https://chrisreddington.com" target="_blank" rel="noopener noreferrer">Chris Reddington</a>
+            and
+            <a href="https://github.com/features/copilot" target="_blank" rel="noopener noreferrer" class="landing-footer-copilot-link"></a>
+          </div>
+          
+          <div class="landing-footer-powered">
+            <div class="landing-footer-powered-label">Powered by</div>
+            <div class="landing-footer-tech-list"></div>
+          </div>
+          
+          <div class="landing-footer-repo">
+            <a href="https://github.com/chrisreddington/timestamp" target="_blank" rel="noopener noreferrer" class="landing-footer-repo-link landing-footer-star-link" data-testid="landing-footer-star-link">
+              <span>Star on GitHub</span>
+            </a>
+            <a href="https://github.com/chrisreddington/timestamp/blob/main/docs/THEME_DEVELOPMENT.md" target="_blank" rel="noopener noreferrer" class="landing-footer-repo-link landing-footer-theme-link">
+              <span>Contribute a Theme</span>
+            </a>
+          </div>
+        </div>
+      </footer>
+    </template>
+    
+    <!-- PLAN-002: Theme Picker -->
+    <template id="theme-modal-template">
+      <div class="theme-modal-overlay" data-testid="theme-modal-overlay">
+        <div class="theme-modal" role="dialog" aria-modal="true" data-testid="theme-modal">
+          <div class="theme-modal-header">
+            <h2 id="theme-modal-title" class="theme-modal-title">Select Theme</h2>
+            <button type="button" class="theme-modal-close" aria-label="Close theme selector" data-testid="theme-modal-close"></button>
+          </div>
+          <div class="theme-modal-body"></div>
+        </div>
+      </div>
+    </template>
+    
+    <template id="contribute-card-template">
+      <div class="contribute-theme-row" role="row" data-testid="contribute-theme-card">
+        <div class="contribute-theme-cell" role="gridcell">
+          <a class="contribute-theme-card" href="https://github.com/chrisreddington/timestamp/blob/main/docs/THEME_DEVELOPMENT.md" target="_blank" rel="noopener noreferrer" aria-label="Contribute a theme - view theme development guide (opens in new tab)" tabindex="-1">
+            <div class="contribute-theme-icon" aria-hidden="true"></div>
+            <div class="contribute-theme-content">
+              <span class="contribute-theme-title">Contribute a theme</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </template>
+    
+    <!-- PLAN-002: Toast -->
+    <template id="toast-stack-template">
+      <div class="toast-stack" aria-label="Notifications" data-testid="toast-stack"></div>
+    </template>
+    
+    <template id="toast-element-template">
+      <div class="toast" role="status" aria-live="polite">
+        <div class="toast__content">
+          <span class="toast__icon" aria-hidden="true"></span>
+          <span class="toast__message"></span>
+        </div>
+        <div class="toast__actions"></div>
+      </div>
+    </template>
+    
+    <!-- PLAN-002: World Map -->
+    <template id="world-map-template">
+      <figure class="world-map-wrapper" data-testid="world-map" role="group" aria-label="World map showing day and night regions with city markers indicating countdown celebration status">
+        <div class="world-map-container">
+          <svg class="world-map" viewBox="0 0 400 200" aria-hidden="true" data-testid="world-map-svg">
+            <!-- Subtle grid for reference -->
+            <g class="map-grid">
+              <line x1="0" y1="100" x2="400" y2="100" />
+              <line x1="100" y1="0" x2="100" y2="200" />
+              <line x1="200" y1="0" x2="200" y2="200" />
+              <line x1="300" y1="0" x2="300" y2="200" />
+            </g>
+            
+            <!-- Continent shapes (d attribute set via JS) -->
+            <g class="continents">
+              <path class="continent" d="" />
+            </g>
+            
+            <!-- Night overlay - updated dynamically -->
+            <path class="night-overlay" d="" data-testid="night-overlay" />
+          </svg>
+          
+          <!-- City markers overlay -->
+          <div class="city-markers" data-testid="city-markers"></div>
+        </div>
+      </figure>
+    </template>
+    
+    <!-- PLAN-002: Tooltip -->
+    <template id="tooltip-template">
+      <div class="tooltip" role="tooltip" aria-hidden="true"></div>
+    </template>
+    
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+/**
+ * Visibility Utilities
+ * Replaces inline style.display manipulation with declarative CSS.
+ * 
+ * Components use the 'hidden' attribute or CSS classes for visibility control
+ * instead of inline style.display manipulation.
+ */
+
+/* Hidden attribute - standard HTML5 semantic hiding */
+[hidden] {
+  display: none !important;
+}
+
+/* Utility classes for common display patterns */
+.is-visible {
+  display: block;
+}
+
+.is-visible-flex {
+  display: flex;
+}
+
+.is-visible-inline {
+  display: inline;
+}
+
+.is-hidden {
+  display: none !important;
+}

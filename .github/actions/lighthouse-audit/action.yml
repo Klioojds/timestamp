@@ -1,0 +1,89 @@
+# Lighthouse Audit Composite Action
+# Runs Lighthouse CI against a URL and extracts scores
+# Reusable across baseline and post-deployment audits
+name: 'Lighthouse Audit'
+description: 'Run Lighthouse CI audit and extract scores'
+
+inputs:
+  url:
+    description: 'URL to audit'
+    required: true
+  number-of-runs:
+    description: 'Number of Lighthouse runs (for variance reduction)'
+    required: false
+    default: '3'
+  artifact-name:
+    description: 'Name for the uploaded artifact'
+    required: true
+  retention-days:
+    description: 'Artifact retention in days'
+    required: false
+    default: '14'
+
+outputs:
+  performance:
+    description: 'Performance score (0-100)'
+    value: ${{ steps.extract.outputs.performance }}
+  accessibility:
+    description: 'Accessibility score (0-100)'
+    value: ${{ steps.extract.outputs.accessibility }}
+  best-practices:
+    description: 'Best Practices score (0-100)'
+    value: ${{ steps.extract.outputs.best-practices }}
+  seo:
+    description: 'SEO score (0-100)'
+    value: ${{ steps.extract.outputs.seo }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node for Lighthouse
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      with:
+        node-version: 'lts/*'
+
+    - name: Install Lighthouse CI CLI
+      shell: bash
+      run: npm install -g @lhci/cli@0.15.x
+
+    - name: Run Lighthouse audit
+      shell: bash
+      run: |
+        lhci collect \
+          --url="${{ inputs.url }}" \
+          --numberOfRuns=${{ inputs.number-of-runs }}
+
+    - name: Extract Lighthouse scores
+      id: extract
+      shell: bash
+      run: |
+        # Find the first LHR file (representative run)
+        LHRS=$(ls -1 .lighthouseci/lhr-*.json 2>/dev/null | head -1)
+        if [ -n "$LHRS" ]; then
+          # Extract category scores (0-1 scale, convert to percentage)
+          PERF=$(jq -r '.categories.performance.score * 100 | floor' "$LHRS")
+          A11Y=$(jq -r '.categories.accessibility.score * 100 | floor' "$LHRS")
+          BP=$(jq -r '.categories["best-practices"].score * 100 | floor' "$LHRS")
+          SEO=$(jq -r '.categories.seo.score * 100 | floor' "$LHRS")
+          
+          echo "performance=$PERF" >> $GITHUB_OUTPUT
+          echo "accessibility=$A11Y" >> $GITHUB_OUTPUT
+          echo "best-practices=$BP" >> $GITHUB_OUTPUT
+          echo "seo=$SEO" >> $GITHUB_OUTPUT
+          
+          echo "Lighthouse scores: Performance=$PERF, Accessibility=$A11Y, Best Practices=$BP, SEO=$SEO"
+        else
+          echo "::warning::No Lighthouse results found"
+          echo "performance=0" >> $GITHUB_OUTPUT
+          echo "accessibility=0" >> $GITHUB_OUTPUT
+          echo "best-practices=0" >> $GITHUB_OUTPUT
+          echo "seo=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Upload Lighthouse reports
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      if: always()
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: .lighthouseci/
+        retention-days: ${{ inputs.retention-days }}

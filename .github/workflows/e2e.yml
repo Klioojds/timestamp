@@ -1,0 +1,116 @@
+# Reusable Playwright E2E workflow
+# Can be called from other workflows via `uses: ./.github/workflows/e2e.yml`
+name: "E2E Tests"
+
+on:
+  workflow_call:
+    inputs:
+      shard-total:
+        description: "Number of shards to split the suite across"
+        required: false
+        type: number
+        default: 4
+  workflow_dispatch:
+    inputs:
+      shard-total:
+        description: "Number of shards to split the suite across"
+        required: false
+        type: number
+        default: 4
+
+permissions:
+  contents: read
+
+jobs:
+  # Generate dynamic shard indices based on shard-total input
+  setup-matrix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      shardIndices: ${{ steps.set-shards.outputs.indices }}
+    steps:
+      - name: Generate shard indices
+        id: set-shards
+        run: |
+          # Generate array [1, 2, ..., N] based on shard-total input
+          indices=$(seq 1 ${{ inputs.shard-total }} | jq -R -s -c 'split("\n") | map(select(. != "") | tonumber)')
+          echo "indices=$indices" >> $GITHUB_OUTPUT
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [setup-matrix]
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: ${{ fromJson(needs.setup-matrix.outputs.shardIndices) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate E2E fixtures are in sync
+        run: npm run theme sync:fixtures -- --check
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests (shard ${{ matrix.shardIndex }}/${{ inputs.shard-total }})
+        run: npx playwright test --shard=${{ matrix.shardIndex }}/${{ inputs.shard-total }}
+
+      - name: Upload blob report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: blob-report/
+          retention-days: 1
+
+  merge-reports:
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    needs: [setup-matrix, e2e-tests]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: '.node-version'
+          # Skip npm cache - we only need playwright CLI
+
+      # Only install playwright - not full dependencies
+      # This saves ~30s compared to npm ci
+      - name: Install Playwright CLI
+        run: npm install --no-save @playwright/test
+
+      - name: Download blob reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge into HTML report
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
