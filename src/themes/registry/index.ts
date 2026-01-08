@@ -13,7 +13,7 @@ export {
   THEME_REGISTRY,
   type ThemeId,
   type ThemeMetadata,
-  type ThemeRegistryEntry,
+  type ThemeRegistryEntry
 } from './registry-core';
 
 // Metadata: Synchronous, lightweight accessors
@@ -25,7 +25,7 @@ export {
   getThemeMetadata,
   getThemePublishedDate,
   getThemeTags,
-  isNewTheme,
+  isNewTheme
 } from './registry-metadata';
 
 // Validation: Type guards and validation utilities
@@ -33,8 +33,9 @@ export {
   getThemeIds,
   getValidThemes,
   isValidThemeId,
-  validateThemeId,
+  validateThemeId
 } from './registry-validation';
 
 // Loaders: Async theme loading utilities
-export { getLandingPageRendererFactory,loadThemeSafe } from './registry-loaders';
+export { getLandingPageRendererFactory, loadThemeSafe } from './registry-loaders';
+

@@ -11,7 +11,7 @@
  * - Theme-specific visual features
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const MOBILE_VIEWPORT = { width: 375, height: 667 };
 const SMALL_MOBILE_VIEWPORT = { width: 320, height: 568 };
