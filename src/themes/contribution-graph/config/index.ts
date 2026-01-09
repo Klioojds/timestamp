@@ -216,11 +216,6 @@ export function getAmbientClass(intensity: number, phase: string, stagger?: numb
   return AMBIENT_CLASS_STRINGS[`${phase}-${intensity}-${staggerIndex}`] ?? getBaseClass(intensity);
 }
 
-/** Get random stagger index for explicit control. */
-export function getRandomStagger(): number {
-  return Math.floor(Math.random() * STAGGER_BUCKET_COUNT);
-}
-
 // =============================================================================
 // VISUAL CONFIGURATION
 // =============================================================================
