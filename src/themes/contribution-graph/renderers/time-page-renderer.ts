@@ -1,44 +1,40 @@
 /**
  * Canvas-based Time Page Renderer for Contribution Graph theme.
  *
- * PERFORMANCE: This renderer uses a single `canvas` element instead of 5000+ DOM nodes.
- * Benefits:
- * - Eliminates WindowServer compositor overhead (macOS)
- * - One GPU layer vs thousands
- * - 30fps throttled rendering (sufficient for ambient effects)
- * - Dirty-rect updates (only repaint what changed)
- *
- * Expected CPU reduction: WindowServer 49% to under 10%
+ * Renders countdown using a single `<canvas>` element with:
+ * - 30fps throttled animation (sufficient for ambient effects)
+ * - Dirty-rect updates (only repaint changed squares)
+ * - Single GPU layer for efficient compositing
  */
 
 import type { CelebrationOptions } from '@core/types';
 import type {
-    AnimationStateContext,
-    AnimationStateGetter,
-    MountContext,
-    ResourceTracker,
-    TimePageRenderer,
-    TimeRemaining,
+  AnimationStateContext,
+  AnimationStateGetter,
+  MountContext,
+  ResourceTracker,
+  TimePageRenderer,
+  TimeRemaining,
 } from '@themes/shared/types';
 
 import { getActivityPhase } from '../config';
 import {
-    type AmbientState,
-    createAmbientState,
-    manageAmbientActivity,
-    setPhase,
-    startAmbient,
-    stopAmbient,
-    updateAmbientAnimations,
+  type AmbientState,
+  createAmbientState,
+  manageAmbientActivity,
+  setPhase,
+  startAmbient,
+  stopAmbient,
+  updateAmbientAnimations,
 } from '../utils/canvas/ambient';
 import { clearCelebrationMessage, renderCelebrationMessage } from '../utils/canvas/celebration';
 import { clearDigits, updateDigits } from '../utils/canvas/digits';
 import { type CanvasRenderer, createCanvasRenderer } from '../utils/canvas/renderer';
 import {
-    type CanvasGridState,
-    createCanvasGridState,
-    markFullRepaint,
-    resetSquares,
+  type CanvasGridState,
+  createCanvasGridState,
+  markFullRepaint,
+  resetSquares,
 } from '../utils/canvas/state';
 import { buildWall, clearWall, unbuildWall } from '../utils/canvas/wall-build';
 import { formatCountdown } from '../utils/grid';

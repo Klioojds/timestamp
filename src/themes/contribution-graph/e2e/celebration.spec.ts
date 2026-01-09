@@ -1,17 +1,14 @@
 /**
  * ContributionGraph Theme Celebration Tests
  *
- * Tests the wall-build animation and pixel art celebration text.
+ * Tests for the wall-build animation and pixel art celebration text.
  *
- * IMPORTANT: These tests are temporarily skipped while the theme transitions
- * from DOM-based to canvas-based rendering. The canvas renderer doesn't expose
- * DOM elements that the tests previously relied on. Tests will need to be
- * redesigned to use alternative verification methods:
- * - Canvas snapshot testing
- * - Data attributes on parent container
- * - Visual regression testing
- *
- * @see PLAN-003-canvas-renderer-cleanup.md for details
+ * NOTE: These tests are skipped because the canvas renderer doesn't expose
+ * DOM elements that E2E tests can directly verify. Future implementation
+ * options include:
+ * - Canvas snapshot testing (visual regression)
+ * - Data attributes on parent container tracking state
+ * - Exposed JS API for canvas state inspection
  */
 
 import { expect, test } from '@playwright/test';

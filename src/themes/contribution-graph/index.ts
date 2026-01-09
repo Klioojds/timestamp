@@ -6,9 +6,6 @@
  * @remarks
  * Entry point for the contribution-graph theme. Exports theme configuration
  * and renderer factories for registry integration.
- *
- * PERFORMANCE: Uses canvas-based rendering instead of 5000+ DOM elements.
- * This eliminates WindowServer compositor overhead on macOS (49% to under 10% CPU).
  */
 
 import './styles.scss';

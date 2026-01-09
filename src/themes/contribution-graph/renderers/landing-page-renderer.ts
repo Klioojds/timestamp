@@ -1,31 +1,28 @@
 /**
  * Canvas-based Landing Page Renderer for Contribution Graph theme.
  *
- * PERFORMANCE: Uses same canvas approach as time page for consistency.
- * Single <canvas> element instead of thousands of DOM nodes.
- *
- * Differences from time page:
- * - Full document height coverage (scrollable backgrounds)
+ * Renders an animated background using a single `<canvas>` element with:
+ * - Viewport-sized canvas for fixed-position background coverage
  * - Exclusion zone support (to avoid animating behind landing card)
- * - No digit/celebration rendering (ambient only)
+ * - Ambient activity only (no digits/celebration)
  * - Simplified state (always "calm" phase)
  */
 
 import type { AnimationStateContext, LandingPageRenderer, MountContext } from '@core/types';
 
 import {
-    type AmbientState,
-    createAmbientState,
-    manageAmbientActivity,
-    startAmbient,
-    stopAmbient,
-    updateAmbientAnimations,
+  type AmbientState,
+  createAmbientState,
+  manageAmbientActivity,
+  startAmbient,
+  stopAmbient,
+  updateAmbientAnimations,
 } from '../utils/canvas/ambient';
 import { type CanvasRenderer, createCanvasRenderer } from '../utils/canvas/renderer';
 import {
-    type CanvasGridState,
-    createCanvasGridState,
-    markFullRepaint,
+  type CanvasGridState,
+  createCanvasGridState,
+  markFullRepaint,
 } from '../utils/canvas/state';
 
 // =============================================================================
