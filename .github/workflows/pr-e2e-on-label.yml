@@ -108,7 +108,8 @@ jobs:
           path: test-results/perf-profiles/
           retention-days: 30
 
-  # Deep tests sharded across 2 runners (each test needs 60-90s observation)
+  # Deep tests run sequentially on one runner (each test needs 60-90s observation)
+  # Sharding doesn't help since Playwright distributes by count, not duration
   perf-deep:
     needs: [e2e-on-label, detect-new-theme]
     if: |
@@ -122,10 +123,6 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
     env:
       PERF_THEME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.perf-theme || needs.detect-new-theme.outputs.new-theme }}
     steps:
@@ -144,16 +141,16 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run deep performance tests (shard ${{ matrix.shard }}/2)
+      - name: Run deep performance tests
         run: |
-          echo "Running deep perf tests shard ${{ matrix.shard }}/2${PERF_THEME:+ for theme: $PERF_THEME}"
-          npx playwright test --project=chromium --timeout=360000 --retries=0 --workers=1 --grep '@perf-deep' --shard=${{ matrix.shard }}/2 --reporter=list
+          echo "Running deep perf tests${PERF_THEME:+ for theme: $PERF_THEME}"
+          npx playwright test --project=chromium --timeout=360000 --retries=0 --workers=1 --grep '@perf-deep' --reporter=list
 
       - name: Upload perf profiles
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
-          name: perf-profiles-deep-${{ matrix.shard }}
+          name: perf-profiles-deep
           path: test-results/perf-profiles/
           retention-days: 30
 
