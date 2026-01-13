@@ -421,8 +421,8 @@ describe('theme-previews', () => {
 
       await expect(generateThemePreview(mockPage, theme, config, options)).rejects.toThrow();
 
-      // Should log both 1x and 2x size generation
-      expect(consoleSpy).toHaveBeenCalledWith('  🖼️  Test Theme (dark, 426x240)...');
+      // Should log the capture start message
+      expect(consoleSpy).toHaveBeenCalledWith('  📸 Capturing Test Theme (test-theme, dark)...');
 
       consoleSpy.mockRestore();
     });
