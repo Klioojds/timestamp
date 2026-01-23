@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 📚 Documentation
-    url: https://github.com/chrisreddington/timestamp/blob/main/README.md
-    about: Check out the documentation for guides and examples
-  - name: 🎨 Theme Development Guide
-    url: https://github.com/chrisreddington/timestamp/blob/main/docs/THEME_DEVELOPMENT.md
-    about: Learn how to create your own countdown theme
